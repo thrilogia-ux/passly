@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { QRScanner } from "@/components/check-in/qr-scanner";
 import { QrCode, Camera, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function CheckInPage() {
+function CheckInContent() {
   const searchParams = useSearchParams();
   const eventId = searchParams.get("eventId");
   
@@ -230,5 +230,13 @@ export default function CheckInPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CheckInPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-4xl mx-auto p-8">Cargando...</div>}>
+      <CheckInContent />
+    </Suspense>
   );
 }
