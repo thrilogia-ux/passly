@@ -1,0 +1,299 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+// Seed script configuration
+// Run with: npm run db:seed
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Roles: SUPER_ADMIN, CLIENT, ORGANIZER, STAFF
+enum UserRole {
+  SUPER_ADMIN
+  CLIENT
+  ORGANIZER
+  STAFF
+}
+
+enum EventStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
+enum GuestType {
+  PRESS
+  INFLUENCER
+  VIP
+  STAFF
+  PROVIDER
+}
+
+enum InvitationStatus {
+  PENDING
+  SENT
+  CONFIRMED
+  REJECTED
+}
+
+enum QRStatus {
+  VALID
+  USED
+  INVALIDATED
+}
+
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  password       String // hashed with bcrypt
+  name           String?
+  role           UserRole      @default(CLIENT)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  organizedEvents Event[]   @relation("EventOrganizer")
+  checkIns        CheckIn[]
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Token system
+  tokenBalance Int    @default(0) // Tokens disponibles
+  tokenPlan    String? // FREE, STARTER, PRO, ENTERPRISE
+
+  // Relations
+  users            User[]
+  events           Event[]
+  templates        InvitationTemplate[]
+  tokenTransactions TokenTransaction[]
+
+  @@index([slug])
+}
+
+model Event {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  date           DateTime
+  location       String?
+  status         EventStatus  @default(DRAFT)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizerId    String?
+  organizer      User?        @relation("EventOrganizer", fields: [organizerId], references: [id])
+
+  // QR Configuration
+  allowReentry Boolean   @default(true)
+  maxReentries Int       @default(1)
+  validFrom    DateTime?
+  validUntil   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  guestEvents GuestEvent[]
+  invitations Invitation[]
+  qrCodes     QRCode[]
+  checkIns    CheckIn[]
+  invitationTemplates InvitationTemplate[]
+
+  @@index([organizationId])
+  @@index([organizerId])
+  @@index([status])
+  @@index([date])
+}
+
+model Guest {
+  id        String    @id @default(cuid())
+  email     String
+  name      String
+  phone     String?
+  type      GuestType @default(VIP)
+  tags      String? // Dynamic tags (comma-separated)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations - Invitado transversal (puede estar en múltiples eventos)
+  guestEvents GuestEvent[]
+
+  @@unique([email])
+  @@index([email])
+  @@index([type])
+}
+
+model GuestEvent {
+  id      String @id @default(cuid())
+  guestId String
+  guest   Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Custom fields per event
+  customFields Json? // Flexible JSON field for custom data (restricciones alimentarias, acompañantes, etc.)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  invitation Invitation?
+  qrCode     QRCode?
+
+  @@unique([guestId, eventId])
+  @@index([guestId])
+  @@index([eventId])
+}
+
+model InvitationTemplate {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  // Contenido HTML/CSS (actual)
+  htmlContent    String? // HTML template with placeholders
+  cssContent     String? // Custom CSS
+  
+  // Nuevos campos para diseño gráfico
+  backgroundImage String?     // URL de la imagen de fondo
+  qrPosition      String?     // JSON: { x: number, y: number, width: number, height: number }
+  qrSize          Int?        @default(200) // Tamaño del QR en píxeles
+  
+  // Asignación a eventos específicos
+  eventId        String?     // Si es null, es template global de la organización
+  event          Event?      @relation(fields: [eventId], references: [id])
+  
+  version        Int          @default(1)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  invitations Invitation[]
+
+  @@index([organizationId])
+  @@index([eventId])
+  @@index([isActive])
+}
+
+model Invitation {
+  id                  String              @id @default(cuid())
+  guestEventId        String              @unique
+  guestEvent          GuestEvent          @relation(fields: [guestEventId], references: [id], onDelete: Cascade)
+  eventId             String
+  event               Event               @relation(fields: [eventId], references: [id])
+  templateId          String?
+  template            InvitationTemplate? @relation(fields: [templateId], references: [id])
+  status              InvitationStatus    @default(PENDING)
+  sentAt              DateTime?
+  confirmedAt         DateTime?
+  rejectedAt          DateTime?
+  emailSubject        String?
+  emailBody           String?
+  
+  // RSVP fields
+  confirmationToken   String?             @unique // Token único para confirmación pública
+  rsvpResponse        String?             // YES, NO, MAYBE
+  dietaryRestrictions String?             // Restricciones alimentarias
+  accessibilityNeeds  String?             // Necesidades de accesibilidad
+  additionalGuests    Int                 @default(0) // Número de acompañantes
+  notes               String?             // Notas adicionales del invitado
+  
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([status])
+  @@index([sentAt])
+  @@index([eventId])
+  @@index([confirmationToken])
+  @@index([rsvpResponse])
+}
+
+model QRCode {
+  id           String     @id @default(cuid())
+  token        String     @unique // Encrypted JWT token
+  guestEventId String     @unique
+  guestEvent   GuestEvent @relation(fields: [guestEventId], references: [id], onDelete: Cascade)
+  eventId      String
+  event        Event      @relation(fields: [eventId], references: [id])
+  status       QRStatus   @default(VALID)
+  expiresAt    DateTime? // For screenshot prevention
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  checkIns CheckIn[]
+
+  @@index([token])
+  @@index([eventId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model CheckIn {
+  id              String   @id @default(cuid())
+  qrCodeId        String
+  qrCode          QRCode   @relation(fields: [qrCodeId], references: [id])
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id])
+  checkedInBy     String? // User ID who scanned
+  checkedInByUser User?    @relation(fields: [checkedInBy], references: [id])
+  checkedInAt     DateTime @default(now())
+  zone            String? // For multi-zone support (general, backstage, prensa)
+  notes           String?
+
+  @@index([qrCodeId])
+  @@index([eventId])
+  @@index([checkedInAt])
+  @@index([zone])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String // e.g., "USER_LOGIN", "EVENT_CREATED", "GUEST_DELETED"
+  entity    String? // Entity type
+  entityId  String? // Entity ID
+  details   Json? // Additional details
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model TokenTransaction {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  type           String       // PURCHASE, USAGE, REFUND, BONUS
+  amount         Int          // Positivo para compras, negativo para uso
+  description    String?
+  metadata       String?      // JSON string para datos adicionales (eventId, invitationId, etc.)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([createdAt])
+}
