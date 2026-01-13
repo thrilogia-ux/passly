@@ -8,6 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { QRPositionEditorV2 } from "@/components/templates/qr-position-editor-v2";
 import { Upload, Image as ImageIcon, Code, Save, Loader2 } from "lucide-react";
 
+type QRPosition = 
+  | "top-left" 
+  | "top-center" 
+  | "top-right"
+  | "center-left" 
+  | "center" 
+  | "center-right"
+  | "bottom-left" 
+  | "bottom-center" 
+  | "bottom-right"
+  | "custom";
+
 export default function EditTemplatePage({
   params,
 }: {
@@ -28,7 +40,7 @@ export default function EditTemplatePage({
     htmlContent: "",
     cssContent: "",
     qrPosition: null as { 
-      zone?: string;
+      zone?: QRPosition;
       x?: number; 
       y?: number; 
       width?: number; 
