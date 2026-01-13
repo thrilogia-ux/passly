@@ -27,7 +27,13 @@ export default function EditTemplatePage({
     backgroundImage: "",
     htmlContent: "",
     cssContent: "",
-    qrPosition: null as { x: number; y: number; width: number; height: number } | null,
+    qrPosition: null as { 
+      zone?: string;
+      x?: number; 
+      y?: number; 
+      width?: number; 
+      height?: number;
+    } | null,
     qrSize: 200,
   });
 
@@ -268,7 +274,12 @@ export default function EditTemplatePage({
                     <h3 className="text-sm font-medium mb-2">Posición del QR</h3>
                     <QRPositionEditorV2
                       backgroundImage={formData.backgroundImage}
-                      onPositionChange={(pos) => setFormData({ ...formData, qrPosition: { ...formData.qrPosition, ...pos } })}
+                      onPositionChange={(pos) => setFormData({ 
+                        ...formData, 
+                        qrPosition: formData.qrPosition 
+                          ? { ...formData.qrPosition, ...pos } 
+                          : pos 
+                      })}
                       initialPosition={formData.qrPosition || undefined}
                       qrSize={formData.qrSize}
                     />
