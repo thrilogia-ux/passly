@@ -8,7 +8,7 @@
     "start": "next start -p 3002",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy --schema=./prisma/schema.prisma && next build",
+    "vercel-build": "prisma generate && next build",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset && npm run db:seed",
     "tokens:add": "tsx scripts/add-tokens.ts",
