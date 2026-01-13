@@ -8,6 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { QRPositionEditorV2 } from "@/components/templates/qr-position-editor-v2";
 import { Upload, Image as ImageIcon, Code, Save } from "lucide-react";
 
+type QRPosition = 
+  | "top-left" 
+  | "top-center" 
+  | "top-right"
+  | "center-left" 
+  | "center" 
+  | "center-right"
+  | "bottom-left" 
+  | "bottom-center" 
+  | "bottom-right"
+  | "custom";
+
 export default function NewTemplatePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -21,7 +33,13 @@ export default function NewTemplatePage() {
     backgroundImage: "",
     htmlContent: "",
     cssContent: "",
-    qrPosition: { x: 100, y: 100, width: 200, height: 200 } as { x: number; y: number; width: number; height: number } | null,
+    qrPosition: null as { 
+      zone?: QRPosition;
+      x?: number; 
+      y?: number; 
+      width?: number; 
+      height?: number;
+    } | null,
     qrSize: 200,
   });
 
@@ -207,7 +225,12 @@ export default function NewTemplatePage() {
                     <h3 className="text-sm font-medium mb-2">Posición del QR</h3>
                     <QRPositionEditorV2
                       backgroundImage={formData.backgroundImage}
-                      onPositionChange={(pos) => setFormData({ ...formData, qrPosition: { ...formData.qrPosition, ...pos } })}
+                      onPositionChange={(pos) => setFormData({ 
+                        ...formData, 
+                        qrPosition: formData.qrPosition 
+                          ? { ...formData.qrPosition, ...pos } 
+                          : pos 
+                      })}
                       initialPosition={formData.qrPosition || undefined}
                       qrSize={formData.qrSize}
                     />
