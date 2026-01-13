@@ -5,20 +5,8 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
-  // For Prisma 7 with PostgreSQL, we need to pass the DATABASE_URL explicitly
-  // or use an adapter. Since we're using PostgreSQL, we pass the URL directly.
-  const databaseUrl = process.env.DATABASE_URL;
-  
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL environment variable is not set");
-  }
-
+  // Prisma 7 reads DATABASE_URL from schema.prisma or environment variables automatically
   return new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl,
-      },
-    },
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 }
