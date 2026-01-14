@@ -77,7 +77,7 @@ export default async function DashboardPage() {
     
     // Estadísticas de invitaciones
     activeEvents.forEach(event => {
-      event.guestEvents.forEach(ge => {
+      event.guestEvents.forEach((ge: any) => {
         if (ge.invitation) {
           if (ge.invitation.status === InvitationStatus.CONFIRMED) totalConfirmed++;
           else if (ge.invitation.status === InvitationStatus.REJECTED) totalRejected++;
@@ -302,16 +302,16 @@ export default async function DashboardPage() {
               // Calcular estadísticas por evento
               const eventGuests = event.guestEvents.length;
               const eventConfirmed = event.guestEvents.filter(
-                ge => ge.invitation?.status === InvitationStatus.CONFIRMED
+                (ge: any) => ge.invitation?.status === InvitationStatus.CONFIRMED
               ).length;
               const eventRejected = event.guestEvents.filter(
-                ge => ge.invitation?.status === InvitationStatus.REJECTED
+                (ge: any) => ge.invitation?.status === InvitationStatus.REJECTED
               ).length;
               const eventPending = event.guestEvents.filter(
-                ge => !ge.invitation || ge.invitation.status === InvitationStatus.PENDING
+                (ge: any) => !ge.invitation || ge.invitation.status === InvitationStatus.PENDING
               ).length;
               const eventSent = event.guestEvents.filter(
-                ge => ge.invitation?.status === InvitationStatus.SENT
+                (ge: any) => ge.invitation?.status === InvitationStatus.SENT
               ).length;
               const eventCheckIns = event._count.checkIns;
               const attendanceRate = eventGuests > 0 

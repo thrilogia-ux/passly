@@ -11,6 +11,8 @@
     "vercel-build": "prisma generate && next build",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset && npm run db:seed",
+    "create-admin": "tsx scripts/create-admin-user.ts",
+    "verify-admin": "tsx scripts/verify-admin-user.ts",
     "tokens:add": "tsx scripts/add-tokens.ts",
     "templates:delete-all": "tsx scripts/delete-all-templates.ts"
   },
