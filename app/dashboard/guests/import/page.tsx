@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Upload, FileSpreadsheet, Download, CheckCircle, XCircle, Loader2 } from
 import Link from "next/link";
 import * as XLSX from "xlsx";
 
-export default function ImportGuestsPage() {
+function ImportGuestsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventIdParam = searchParams.get("eventId");
@@ -316,5 +316,13 @@ export default function ImportGuestsPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function ImportGuestsPage() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto p-8">Cargando importador...</div>}>
+      <ImportGuestsContent />
+    </Suspense>
   );
 }
