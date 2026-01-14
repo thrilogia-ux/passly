@@ -6,13 +6,11 @@ const globalForPrisma = globalThis as unknown as {
 
 function createPrismaClient() {
   // Prisma 6 reads DATABASE_URL from schema.prisma or environment variables automatically
+  if (!process.env.DATABASE_URL) {
+    console.error("DATABASE_URL is not set!");
+  }
   return new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
   });
 }
 
