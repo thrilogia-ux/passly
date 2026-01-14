@@ -29,61 +29,72 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Obtener solo eventos ACTIVOS
-  const whereClause: any = {
-    status: EventStatus.ACTIVE,
-  };
-
-  if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId) {
-    whereClause.organizationId = session.user.organizationId;
-  }
-
-  const activeEvents = await db.event.findMany({
-    where: whereClause,
-    include: {
-      guestEvents: {
-        include: {
-          guest: true,
-          invitation: true,
-        },
-      },
-      _count: {
-        select: {
-          guestEvents: true,
-          checkIns: true,
-        },
-      },
-    },
-    orderBy: {
-      date: "asc", // Próximos eventos primero
-    },
-    take: 6, // Los 6 próximos
-  });
-
-  // Calcular estadísticas globales
-  const totalGuests = activeEvents.reduce((sum, e) => sum + e._count.guestEvents, 0);
-  const totalCheckIns = activeEvents.reduce((sum, e) => sum + e._count.checkIns, 0);
-  
-  // Estadísticas de invitaciones
+  // Initialize default values
+  let activeEvents: any[] = [];
+  let totalGuests = 0;
+  let totalCheckIns = 0;
   let totalConfirmed = 0;
   let totalRejected = 0;
   let totalPending = 0;
   let totalSent = 0;
+  let totalPendingInvitations = 0;
 
-  activeEvents.forEach(event => {
-    event.guestEvents.forEach(ge => {
-      if (ge.invitation) {
-        if (ge.invitation.status === InvitationStatus.CONFIRMED) totalConfirmed++;
-        else if (ge.invitation.status === InvitationStatus.REJECTED) totalRejected++;
-        else if (ge.invitation.status === InvitationStatus.PENDING) totalPending++;
-        else if (ge.invitation.status === InvitationStatus.SENT) totalSent++;
-      } else {
-        totalPending++;
-      }
+  try {
+    // Obtener solo eventos ACTIVOS
+    const whereClause: any = {
+      status: EventStatus.ACTIVE,
+    };
+
+    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId) {
+      whereClause.organizationId = session.user.organizationId;
+    }
+
+    activeEvents = await db.event.findMany({
+      where: whereClause,
+      include: {
+        guestEvents: {
+          include: {
+            guest: true,
+            invitation: true,
+          },
+        },
+        _count: {
+          select: {
+            guestEvents: true,
+            checkIns: true,
+          },
+        },
+      },
+      orderBy: {
+        date: "asc", // Próximos eventos primero
+      },
+      take: 6, // Los 6 próximos
     });
-  });
 
-  const totalPendingInvitations = totalPending + totalSent;
+    // Calcular estadísticas globales
+    totalGuests = activeEvents.reduce((sum, e) => sum + e._count.guestEvents, 0);
+    totalCheckIns = activeEvents.reduce((sum, e) => sum + e._count.checkIns, 0);
+    
+    // Estadísticas de invitaciones
+    activeEvents.forEach(event => {
+      event.guestEvents.forEach(ge => {
+        if (ge.invitation) {
+          if (ge.invitation.status === InvitationStatus.CONFIRMED) totalConfirmed++;
+          else if (ge.invitation.status === InvitationStatus.REJECTED) totalRejected++;
+          else if (ge.invitation.status === InvitationStatus.PENDING) totalPending++;
+          else if (ge.invitation.status === InvitationStatus.SENT) totalSent++;
+        } else {
+          totalPending++;
+        }
+      });
+    });
+
+    totalPendingInvitations = totalPending + totalSent;
+  } catch (error) {
+    console.error("Error loading dashboard data:", error);
+    // Continue with empty data if database query fails
+    // This allows the page to render even if there's a DB connection issue
+  }
 
   return (
     <div className="space-y-8 pb-8">
