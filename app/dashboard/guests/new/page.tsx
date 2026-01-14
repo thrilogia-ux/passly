@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GuestType } from "@prisma/client";
 import Link from "next/link";
 
-export default function NewGuestPage() {
+function NewGuestContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventIdParam = searchParams.get("eventId");
@@ -257,5 +257,13 @@ export default function NewGuestPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function NewGuestPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl p-8">Cargando formulario...</div>}>
+      <NewGuestContent />
+    </Suspense>
   );
 }

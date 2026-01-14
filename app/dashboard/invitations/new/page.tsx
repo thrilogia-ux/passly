@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Save, Loader2 } from "lucide-react";
 
-export default function NewInvitationPage() {
+function NewInvitationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const guestEventId = searchParams.get("guestEventId");
@@ -227,5 +227,13 @@ export default function NewInvitationPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewInvitationPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-4xl mx-auto p-8">Cargando formulario...</div>}>
+      <NewInvitationContent />
+    </Suspense>
   );
 }
