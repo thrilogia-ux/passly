@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
-
-// Force Node.js runtime for file operations
-export const runtime = "nodejs";
+import { put } from "@vercel/blob";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,31 +33,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convertir a buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Crear directorio si no existe
-    const uploadDir = join(process.cwd(), "public", "uploads", "templates");
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
     // Generar nombre único
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filename = `${session.user.organizationId}_${timestamp}_${sanitizedName}`;
+    const filename = `templates/${session.user.organizationId}_${timestamp}_${sanitizedName}`;
     
-    // Guardar archivo
-    const uploadPath = join(uploadDir, filename);
-    await writeFile(uploadPath, buffer);
-
-    // Retornar URL pública
-    const publicUrl = `/uploads/templates/${filename}`;
+    // Subir a Vercel Blob Storage
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
+      url: blob.url,
       filename: filename,
     });
   } catch (error: any) {
