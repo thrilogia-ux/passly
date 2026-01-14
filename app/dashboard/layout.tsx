@@ -27,14 +27,22 @@ export default async function DashboardLayout({
 
     // Get organization token balance
     if (session.user.organizationId) {
-      const organization = await db.organization.findUnique({
-        where: { id: session.user.organizationId },
-        select: { tokenBalance: true },
-      });
-      tokenBalance = organization?.tokenBalance || 0;
+      try {
+        const organization = await db.organization.findUnique({
+          where: { id: session.user.organizationId },
+          select: { tokenBalance: true },
+        });
+        tokenBalance = organization?.tokenBalance || 0;
+      } catch (dbError) {
+        console.error("Error fetching organization:", dbError);
+        // Continue without token balance if DB query fails
+        tokenBalance = 0;
+      }
     }
   } catch (error) {
     console.error("Error in layout auth:", error);
+    // Redirect to login on auth error
+    redirect("/login");
   }
 
   // Menú principal: solo CRUD

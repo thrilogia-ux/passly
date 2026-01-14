@@ -38,32 +38,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        // Lazy-load db to avoid Edge Runtime issues
-        const { db } = await import("./db");
-        const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+        try {
+          // Lazy-load db to avoid Edge Runtime issues
+          const { db } = await import("./db");
+          const user = await db.user.findUnique({
+            where: { email: credentials.email as string },
+          });
 
-        if (!user) {
+          if (!user) {
+            return null;
+          }
+
+          const isValidPassword = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          );
+
+          if (!isValidPassword) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name || user.email.split("@")[0],
+            role: user.role,
+            organizationId: user.organizationId || undefined,
+          } as any;
+        } catch (error) {
+          console.error("Auth error:", error);
+          // Return null on any error to prevent exposing internal errors
           return null;
         }
-
-        const isValidPassword = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isValidPassword) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name || user.email.split("@")[0],
-          role: user.role,
-          organizationId: user.organizationId || undefined,
-        } as any;
       },
     }),
   ],
