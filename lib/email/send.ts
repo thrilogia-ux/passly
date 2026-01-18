@@ -79,8 +79,20 @@ export async function sendEmail(options: SendEmailOptions) {
   console.log("🔍 [EMAIL] RESEND_API_KEY length:", cleanKey.length);
   console.log("🔍 [EMAIL] EMAIL_FROM:", process.env.EMAIL_FROM || "No configurado (usará default)");
   
-  // Si no hay API key válida, usar modo desarrollo
+  // Si no hay API key válida
   if (!cleanKey || cleanKey === "" || cleanKey.length < 10) {
+    const isProduction = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+    
+    if (isProduction) {
+      // En producción, no intentar guardar archivos (filesystem es read-only)
+      console.error("❌ [EMAIL] RESEND_API_KEY no configurada en producción");
+      return {
+        success: false,
+        error: "RESEND_API_KEY no está configurada. Configura RESEND_API_KEY en las variables de entorno de Vercel para enviar emails.",
+      };
+    }
+    
+    // Solo en desarrollo local, usar modo desarrollo
     console.warn("⚠️  [EMAIL] RESEND_API_KEY no configurada o inválida");
     console.warn("⚠️  [EMAIL] Usando MODO DESARROLLO (emails se guardan en: emails-dev/)");
     console.warn("⚠️  [EMAIL] Para enviar emails reales, configura SMTP o RESEND_API_KEY en .env");
@@ -91,6 +103,18 @@ export async function sendEmail(options: SendEmailOptions) {
   const resend = getResend();
   
   if (!resend) {
+    const isProduction = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+    
+    if (isProduction) {
+      // En producción, no intentar guardar archivos
+      console.error("❌ [EMAIL] No se pudo inicializar Resend en producción");
+      return {
+        success: false,
+        error: "No se pudo inicializar Resend. Verifica tu RESEND_API_KEY en las variables de entorno de Vercel.",
+      };
+    }
+    
+    // Solo en desarrollo local, usar modo desarrollo
     console.warn("⚠️  No se pudo inicializar Resend. Usando MODO DESARROLLO");
     return await sendEmailDev(options);
   }
