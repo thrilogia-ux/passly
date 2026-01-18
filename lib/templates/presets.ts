@@ -504,7 +504,7 @@ export const TEMPLATE_PRESETS: TemplatePreset[] = [
     description: "Estilo elegante y romántico para bodas",
     previewColor: "#f8d7da",
     qrSize: 180,
-    suggestedQrPosition: "bottom-center",
+    suggestedQrPosition: "center",
     htmlContent: `
       <div class="invitation-container romantic">
         <div class="romantic-header">
