@@ -100,28 +100,28 @@ export async function POST(request: NextRequest) {
       // Si hay imagen de fondo, combinar con QR en la posición especificada
       let combinedImageUrl: string;
       
+      // Si hay qrPosition, usar esa posición
+      let finalQrPosition;
+      if (qrPosition && qrPosition.x !== undefined && qrPosition.y !== undefined) {
+        finalQrPosition = {
+          x: qrPosition.x,
+          y: qrPosition.y,
+          width: qrPosition.width || qrSize,
+          height: qrPosition.height || qrSize,
+        };
+      } else {
+        // Por defecto: centrado horizontalmente, 80% verticalmente (como el editor simple)
+        // Usar valores que indiquen "calcular automáticamente" - combineBackgroundWithQR
+        // calculará basándose en las dimensiones reales de la imagen
+        finalQrPosition = {
+          x: -1, // Valor especial: indica que debe calcularse como centrado
+          y: -1, // Valor especial: indica que debe calcularse (80% vertical)
+          width: qrSize,
+          height: qrSize,
+        };
+      }
+      
       try {
-        // Si hay qrPosition, usar esa posición
-        let finalQrPosition;
-        if (qrPosition && qrPosition.x !== undefined && qrPosition.y !== undefined) {
-          finalQrPosition = {
-            x: qrPosition.x,
-            y: qrPosition.y,
-            width: qrPosition.width || qrSize,
-            height: qrPosition.height || qrSize,
-          };
-        } else {
-          // Por defecto: centrado horizontalmente, 80% verticalmente (como el editor simple)
-          // Usar valores que indiquen "calcular automáticamente" - combineBackgroundWithQR
-          // calculará basándose en las dimensiones reales de la imagen
-          finalQrPosition = {
-            x: -1, // Valor especial: indica que debe calcularse como centrado
-            y: -1, // Valor especial: indica que debe calcularse (80% vertical)
-            width: qrSize,
-            height: qrSize,
-          };
-        }
-        
         // Intentar combinar imagen con QR usando la misma función que se usa en producción
         combinedImageUrl = await combineBackgroundWithQR(
           backgroundImage,
