@@ -38,10 +38,21 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `templates/${session.user.organizationId}_${timestamp}_${sanitizedName}`;
     
+    // Obtener el token de Vercel Blob Storage
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    
+    if (!token) {
+      return NextResponse.json(
+        { error: "BLOB_READ_WRITE_TOKEN not configured" },
+        { status: 500 }
+      );
+    }
+    
     // Subir a Vercel Blob Storage
     const blob = await put(filename, file, {
       access: "public",
       contentType: file.type,
+      token: token,
     });
 
     return NextResponse.json({
