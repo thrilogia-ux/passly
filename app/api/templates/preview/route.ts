@@ -107,11 +107,12 @@ export async function POST(request: NextRequest) {
             height: qrPosition.height || qrSize,
           };
         } else {
-          // Por defecto: valores que se ajustarán al calcular en combineBackgroundWithQR
-          // El QR siempre se centrará horizontalmente
+          // Por defecto: centrado horizontalmente, 80% verticalmente (como el editor simple)
+          // Usar valores que indiquen "calcular automáticamente" - combineBackgroundWithQR
+          // calculará basándose en las dimensiones reales de la imagen
           finalQrPosition = {
-            x: 0, // Se calculará como centrado en combineBackgroundWithQR
-            y: 0,
+            x: -1, // Valor especial: indica que debe calcularse como centrado
+            y: -1, // Valor especial: indica que debe calcularse (80% vertical)
             width: qrSize,
             height: qrSize,
           };
@@ -124,14 +125,17 @@ export async function POST(request: NextRequest) {
           finalQrPosition
         );
       } catch (error: any) {
-        console.error("Error combining images in preview:", error);
-        // Fallback: mostrar imagen sola con QR debajo
-        try {
-          const backgroundImageUrl = await imageToBase64(backgroundImage);
-          combinedImageUrl = backgroundImageUrl;
-        } catch (fallbackError: any) {
-          combinedImageUrl = backgroundImage;
-        }
+        console.error("❌ Error combining images in preview:", error);
+        console.error("❌ Error details:", {
+          message: error.message,
+          stack: error.stack,
+          backgroundImage,
+          qrPosition: finalQrPosition,
+        });
+        
+        // NO hacer fallback silencioso - el QR debe aparecer siempre
+        // Si falla la combinación, lanzar el error para que el usuario sepa
+        throw new Error(`Error al combinar imagen con QR: ${error.message}`);
       }
       
       previewHTML = `

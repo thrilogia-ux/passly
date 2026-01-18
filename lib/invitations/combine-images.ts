@@ -150,9 +150,23 @@ export async function combineBackgroundWithQR(
         });
       }
     } else if (position.x !== undefined && position.y !== undefined) {
-      // Fallback: usar coordenadas directas (para modo custom)
-      scaledX = position.x;
-      scaledY = position.y;
+      // Usar coordenadas directas, pero si x es -1, centrar horizontalmente
+      // y si y es -1, usar 80% verticalmente (por defecto del editor simple)
+      if (position.x === -1) {
+        // Centrar horizontalmente
+        scaledX = (bgRealWidth - qrWidth) / 2;
+      } else {
+        scaledX = position.x;
+      }
+      
+      if (position.y === -1) {
+        // 80% desde arriba (como el editor simple por defecto)
+        scaledY = (bgRealHeight * 0.8) - (qrHeight / 2);
+        // Asegurar que no se salga de los límites
+        scaledY = Math.max(0, Math.min(scaledY, bgRealHeight - qrHeight));
+      } else {
+        scaledY = position.y;
+      }
       
       if (process.env.NODE_ENV === "development") {
         console.log("🔍 QR Position Debug (USANDO COORDENADAS DIRECTAS):", {
@@ -161,9 +175,10 @@ export async function combineBackgroundWithQR(
         });
       }
     } else {
-      // Default: bottom-right
-      scaledX = bgRealWidth - qrWidth - margin;
-      scaledY = bgRealHeight - qrHeight - margin;
+      // Default: centrado horizontalmente, 80% verticalmente (como editor simple)
+      scaledX = (bgRealWidth - qrWidth) / 2;
+      scaledY = (bgRealHeight * 0.8) - (qrHeight / 2);
+      scaledY = Math.max(0, Math.min(scaledY, bgRealHeight - qrHeight));
     }
     
     // Redondear después de todos los cálculos
