@@ -111,7 +111,18 @@ export async function generateInvitationWithQR(
       html = html.replace(/{{name}}/g, data.name);
       html = html.replace(/{{eventName}}/g, data.eventName);
       html = html.replace(/{{eventDate}}/g, data.eventDate);
-      html = html.replace(/{{eventLocation}}/g, data.eventLocation || "");
+      
+      // Reemplazar {{eventLocation}} con link de Google Maps si existe ubicación
+      const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
+      if (mapsLink) {
+        html = html.replace(
+          /{{eventLocation}}/g, 
+          `<a href="${mapsLink}" target="_blank" style="color: #00b5ff; text-decoration: none; border-bottom: 1px solid #00b5ff;">${data.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>`
+        );
+      } else {
+        html = html.replace(/{{eventLocation}}/g, data.eventLocation || "");
+      }
+      
       html = html.replace(/{{confirmUrl}}/g, confirmUrl || "");
       invitationContent = html;
     } else {
@@ -231,7 +242,18 @@ export async function generateInvitationWithQR(
     html = html.replace(/{{name}}/g, data.name);
     html = html.replace(/{{eventName}}/g, data.eventName);
     html = html.replace(/{{eventDate}}/g, data.eventDate);
-    html = html.replace(/{{eventLocation}}/g, data.eventLocation || "");
+    
+    // Reemplazar {{eventLocation}} con link de Google Maps si existe ubicación
+    const mapsLinkForTemplate = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
+    if (mapsLinkForTemplate) {
+      html = html.replace(
+        /{{eventLocation}}/g, 
+        `<a href="${mapsLinkForTemplate}" target="_blank" style="color: #00b5ff; text-decoration: none; border-bottom: 1px solid #00b5ff;">${data.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>`
+      );
+    } else {
+      html = html.replace(/{{eventLocation}}/g, data.eventLocation || "");
+    }
+    
     html = html.replace(/{{qrImage}}/g, `<img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px; display: block; margin: 20px auto;" />`);
     html = html.replace(/{{rsvpButtons}}/g, rsvpButtons);
     html = html.replace(/{{confirmUrl}}/g, confirmUrl || "");

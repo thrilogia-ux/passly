@@ -23,7 +23,6 @@ export default function RSVPPage() {
     response: quickResponse || "",
     dietaryRestrictions: "",
     accessibilityNeeds: "",
-    additionalGuests: 0,
     notes: "",
   });
 
@@ -43,7 +42,6 @@ export default function RSVPPage() {
               response: data.rsvpResponse,
               dietaryRestrictions: data.dietaryRestrictions || "",
               accessibilityNeeds: data.accessibilityNeeds || "",
-              additionalGuests: data.additionalGuests || 0,
               notes: data.notes || "",
             });
           }
@@ -162,7 +160,16 @@ export default function RSVPPage() {
             )}
             {invitation.guestEvent?.event?.location && (
               <p className="text-sm text-gray-600">
-                Ubicación: {invitation.guestEvent.event.location}
+                Ubicación:{" "}
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invitation.guestEvent.event.location)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {invitation.guestEvent.event.location}
+                </a>
+                <span className="text-xs text-gray-500 ml-1">(Ver en Google Maps)</span>
               </p>
             )}
           </CardHeader>
@@ -208,24 +215,6 @@ export default function RSVPPage() {
               {/* Solo mostrar campos adicionales si confirma asistencia */}
               {formData.response === "YES" && (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="additionalGuests">
-                      Número de acompañantes
-                    </Label>
-                    <Input
-                      id="additionalGuests"
-                      type="number"
-                      min="0"
-                      max="10"
-                      value={formData.additionalGuests}
-                      onChange={(e) => setFormData({ ...formData, additionalGuests: Number(e.target.value) })}
-                      placeholder="0"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Indica cuántas personas adicionales te acompañarán
-                    </p>
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="dietaryRestrictions">
                       Restricciones alimentarias
