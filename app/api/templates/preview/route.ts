@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateQRImage } from "@/lib/qr/generate";
+import { combineBackgroundWithQR } from "@/lib/invitations/combine-images";
+import { imageToBase64 } from "@/lib/invitations/image-to-base64";
 
 // Force Node.js runtime for QR code generation
 export const runtime = "nodejs";
@@ -7,7 +9,7 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { htmlContent, cssContent, backgroundImage, qrSize = 200 } = body;
+    const { htmlContent, cssContent, backgroundImage, qrSize = 200, qrPosition } = body;
 
     // Generar QR de ejemplo
     const exampleQRToken = "preview-token-example-" + Date.now();
@@ -91,7 +93,47 @@ export async function POST(request: NextRequest) {
         </html>
       `;
     } else if (backgroundImage) {
-      // Si solo hay imagen de fondo, mostrar con placeholder de QR
+      // Si hay imagen de fondo, combinar con QR en la posición especificada
+      let combinedImageUrl: string;
+      
+      try {
+        // Si hay qrPosition, usar esa posición
+        let finalQrPosition;
+        if (qrPosition && qrPosition.x !== undefined && qrPosition.y !== undefined) {
+          finalQrPosition = {
+            x: qrPosition.x,
+            y: qrPosition.y,
+            width: qrPosition.width || qrSize,
+            height: qrPosition.height || qrSize,
+          };
+        } else {
+          // Por defecto: valores que se ajustarán al calcular en combineBackgroundWithQR
+          // El QR siempre se centrará horizontalmente
+          finalQrPosition = {
+            x: 0, // Se calculará como centrado en combineBackgroundWithQR
+            y: 0,
+            width: qrSize,
+            height: qrSize,
+          };
+        }
+        
+        // Intentar combinar imagen con QR usando la misma función que se usa en producción
+        combinedImageUrl = await combineBackgroundWithQR(
+          backgroundImage,
+          qrImage,
+          finalQrPosition
+        );
+      } catch (error: any) {
+        console.error("Error combining images in preview:", error);
+        // Fallback: mostrar imagen sola con QR debajo
+        try {
+          const backgroundImageUrl = await imageToBase64(backgroundImage);
+          combinedImageUrl = backgroundImageUrl;
+        } catch (fallbackError: any) {
+          combinedImageUrl = backgroundImage;
+        }
+      }
+      
       previewHTML = `
         <!DOCTYPE html>
         <html>
@@ -103,13 +145,14 @@ export async function POST(request: NextRequest) {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
               }
               .preview-container {
                 max-width: 800px;
                 margin: 0 auto;
                 background: white;
               }
-              .background-img {
+              .combined-image {
                 width: 100%;
                 height: auto;
                 display: block;
@@ -118,11 +161,7 @@ export async function POST(request: NextRequest) {
           </head>
           <body>
             <div class="preview-container">
-              <img src="${backgroundImage}" alt="Template preview" class="background-img" />
-              <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.9);">
-                <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
-                <p style="margin-top: 15px; color: #666;">Preview del QR - La posición se configurará con el editor</p>
-              </div>
+              <img src="${combinedImageUrl}" alt="Template preview with QR" class="combined-image" />
             </div>
           </body>
         </html>

@@ -449,6 +449,12 @@ export default function NewTemplatePage() {
             cssContent={formData.cssContent}
             backgroundImage={formData.backgroundImage}
             qrSize={formData.qrSize}
+            qrPosition={formData.qrPosition ? {
+              x: formData.qrPosition.x,
+              y: formData.qrPosition.y,
+              width: formData.qrPosition.width,
+              height: formData.qrPosition.height,
+            } : undefined}
           />
         </div>
 

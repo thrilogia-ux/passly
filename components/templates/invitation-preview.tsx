@@ -9,6 +9,12 @@ interface InvitationPreviewProps {
   cssContent?: string;
   backgroundImage?: string;
   qrSize?: number;
+  qrPosition?: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  };
 }
 
 export function InvitationPreview({
@@ -16,6 +22,7 @@ export function InvitationPreview({
   cssContent,
   backgroundImage,
   qrSize = 200,
+  qrPosition,
 }: InvitationPreviewProps) {
   const [previewHTML, setPreviewHTML] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -42,6 +49,7 @@ export function InvitationPreview({
             cssContent: cssContent || null,
             backgroundImage: backgroundImage || null,
             qrSize,
+            qrPosition: qrPosition || null,
           }),
         });
 
@@ -60,7 +68,7 @@ export function InvitationPreview({
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [htmlContent, cssContent, backgroundImage, qrSize]);
+  }, [htmlContent, cssContent, backgroundImage, qrSize, qrPosition]);
 
   return (
     <Card>

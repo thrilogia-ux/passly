@@ -55,13 +55,18 @@ export function QRPositionEditorSimple({
 
   // Si hay initialPosition, calcular el porcentaje vertical inicial
   useEffect(() => {
-    if (initialPosition?.y !== undefined && imageSize.height > 0) {
+    if (initialPosition?.y !== undefined && imageSize.height > 0 && imageSize.width > 0) {
       const qrHeight = initialPosition.height || position.height;
+      // Calcular el centro del QR en Y
       const centerY = initialPosition.y + (qrHeight / 2);
+      // Convertir a porcentaje (0-100)
       const percent = (centerY / imageSize.height) * 100;
       setVerticalPercent(Math.max(0, Math.min(100, percent)));
+    } else if (imageSize.height > 0 && imageSize.width > 0 && !initialPosition) {
+      // Si no hay posición inicial y ya tenemos el tamaño de la imagen, usar 80% por defecto
+      setVerticalPercent(80);
     }
-  }, [imageSize.height, initialPosition]);
+  }, [imageSize.height, imageSize.width, initialPosition]);
 
   // Calcular posición: X siempre centrado, Y según el porcentaje vertical
   useEffect(() => {
