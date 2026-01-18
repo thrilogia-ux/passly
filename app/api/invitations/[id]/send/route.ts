@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email/send";
 import { generateQRToken } from "@/lib/qr/generate";
 import { generateInvitationWithQR } from "@/lib/invitations/generate";
-import { useTokens } from "@/lib/tokens/use";
+import { useTokens, checkTokens } from "@/lib/tokens/use";
 import { InvitationStatus } from "@prisma/client";
 
 // Force Node.js runtime to ensure Prisma client works correctly
@@ -21,17 +21,12 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check and use tokens (1 token per invitation)
+    // SOLO verificar tokens (sin descontar todavía)
     try {
-      await useTokens(
-        session.user.organizationId,
-        1,
-        `Send invitation ${id}`,
-        { invitationId: id }
-      );
+      await checkTokens(session.user.organizationId, 1);
     } catch (error: any) {
       return NextResponse.json(
-        { error: error.message || "Insufficient tokens" },
+        { error: error.message || "No tenés los tokens suficientes para enviar las invitaciones. Recargá y volvé a intentar." },
         { status: 402 } // Payment Required
       );
     }
@@ -172,6 +167,7 @@ export async function POST(
             details: emailResult.details,
           });
           
+          // NO se descontaron tokens todavía, así que simplemente retornar error
           return NextResponse.json(
             { 
               error: `Error al enviar email: ${emailResult.error || "Error desconocido"}`,
@@ -186,6 +182,14 @@ export async function POST(
         if (emailResult.warning) {
           console.warn("⚠️  Advertencia de envío:", emailResult.warning);
         }
+
+        // ✅ SOLO AHORA, después de envío exitoso, descontar tokens
+        await useTokens(
+          session.user.organizationId,
+          1,
+          `Send invitation ${id}`,
+          { invitationId: id }
+        );
 
     // Update invitation status
     const updatedInvitation = await db.invitation.update({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { useTokens } from "@/lib/tokens/use";
+import { useTokens, checkTokens } from "@/lib/tokens/use";
 import { generateConfirmationToken } from "@/lib/invitations/tokens";
 import { InvitationStatus } from "@prisma/client";
 
@@ -67,17 +67,12 @@ export async function POST(
       });
     }
 
-    // Verificar tokens suficientes
+    // SOLO verificar tokens suficientes (sin descontar todavía)
     try {
-      await useTokens(
-        session.user.organizationId,
-        totalToProcess,
-        `Bulk send invitations for event ${eventId}`,
-        { eventId }
-      );
+      await checkTokens(session.user.organizationId, totalToProcess);
     } catch (error: any) {
       return NextResponse.json(
-        { error: error.message || "Insufficient tokens" },
+        { error: error.message || "No tenés los tokens suficientes para enviar las invitaciones. Recargá y volvé a intentar." },
         { status: 402 }
       );
     }
@@ -253,8 +248,17 @@ export async function POST(
         if (!emailResult.success) {
           const errorMessage = emailResult.error || "Failed to send email";
           console.error("❌ Error enviando email a:", invitation.guestEvent.guest.email, errorMessage);
+          // NO descontar tokens si falla el envío
           throw new Error(`Error al enviar email a ${invitation.guestEvent.guest.email}: ${errorMessage}`);
         }
+
+        // ✅ SOLO AHORA, después de envío exitoso, descontar 1 token
+        await useTokens(
+          session.user.organizationId,
+          1,
+          `Send invitation ${invitation.id} for event ${eventId}`,
+          { invitationId: invitation.id, eventId }
+        );
 
         // Actualizar estado de invitación
         await db.invitation.update({

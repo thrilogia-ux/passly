@@ -1,5 +1,28 @@
 import { db } from "@/lib/db";
 
+// Función para solo verificar tokens sin descontarlos
+export async function checkTokens(
+  organizationId: string,
+  amount: number
+) {
+  const org = await db.organization.findUnique({
+    where: { id: organizationId },
+  });
+
+  if (!org) {
+    throw new Error("Organización no encontrada");
+  }
+
+  if (org.tokenBalance < amount) {
+    throw new Error(`No tenés los tokens suficientes para enviar las invitaciones. Requeridos: ${amount}, Disponibles: ${org.tokenBalance}. Recargá y volvé a intentar.`);
+  }
+
+  return {
+    hasEnough: true,
+    currentBalance: org.tokenBalance,
+  };
+}
+
 export async function useTokens(
   organizationId: string,
   amount: number,
@@ -12,11 +35,11 @@ export async function useTokens(
   });
 
   if (!org) {
-    throw new Error("Organization not found");
+    throw new Error("Organización no encontrada");
   }
 
   if (org.tokenBalance < amount) {
-    throw new Error(`Insufficient tokens. Required: ${amount}, Available: ${org.tokenBalance}`);
+    throw new Error(`No tenés los tokens suficientes para enviar las invitaciones. Requeridos: ${amount}, Disponibles: ${org.tokenBalance}. Recargá y volvé a intentar.`);
   }
 
   // Deduct tokens
