@@ -1,0 +1,172 @@
+import { NextRequest, NextResponse } from "next/server";
+import { generateQRImage } from "@/lib/qr/generate";
+
+// Force Node.js runtime for QR code generation
+export const runtime = "nodejs";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { htmlContent, cssContent, backgroundImage, qrSize = 200 } = body;
+
+    // Generar QR de ejemplo
+    const exampleQRToken = "preview-token-example-" + Date.now();
+    const qrImage = await generateQRImage(exampleQRToken);
+
+    // Datos de ejemplo para el preview
+    const exampleData = {
+      name: "Juan Pérez",
+      eventName: "Evento de Ejemplo",
+      eventDate: new Date().toLocaleDateString("es-AR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      eventLocation: "Salón Principal, Calle Falsa 123",
+    };
+
+    // Si hay HTML/CSS, reemplazar placeholders
+    let previewHTML = "";
+    if (htmlContent) {
+      let html = htmlContent;
+      
+      // Reemplazar placeholders
+      html = html.replace(/\{\{name\}\}/g, exampleData.name);
+      html = html.replace(/\{\{eventName\}\}/g, exampleData.eventName);
+      html = html.replace(/\{\{eventDate\}\}/g, exampleData.eventDate);
+      html = html.replace(/\{\{eventLocation\}\}/g, exampleData.eventLocation);
+      
+      // Reemplazar {{qrImage}} con el QR generado
+      html = html.replace(
+        /\{\{qrImage\}\}/g,
+        `<img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px; display: block; margin: 20px auto;" />`
+      );
+      
+      // Reemplazar {{rsvpButtons}} con botones de ejemplo
+      const rsvpButtons = `
+        <div style="margin: 30px 0; text-align: center; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+          <h3 style="margin-bottom: 15px; color: #303030; font-size: 18px;">Confirma tu asistencia</h3>
+          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+            <a href="#" 
+               style="display: inline-block; padding: 12px 30px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              ✅ Confirmar Asistencia
+            </a>
+            <a href="#" 
+               style="display: inline-block; padding: 12px 30px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              ❌ No puedo asistir
+            </a>
+          </div>
+        </div>
+      `;
+      html = html.replace(/\{\{rsvpButtons\}\}/g, rsvpButtons);
+      
+      // Envolver en estructura HTML completa
+      previewHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f5f5f5;
+              }
+              ${cssContent || ""}
+            </style>
+          </head>
+          <body>
+            ${html}
+          </body>
+        </html>
+      `;
+    } else if (backgroundImage) {
+      // Si solo hay imagen de fondo, mostrar con placeholder de QR
+      previewHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+              }
+              .preview-container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+              }
+              .background-img {
+                width: 100%;
+                height: auto;
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="preview-container">
+              <img src="${backgroundImage}" alt="Template preview" class="background-img" />
+              <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.9);">
+                <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
+                <p style="margin-top: 15px; color: #666;">Preview del QR - La posición se configurará con el editor</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+    } else {
+      // Preview por defecto
+      previewHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                line-height: 1.6;
+                background: #f5f5f5;
+              }
+            </style>
+          </head>
+          <body>
+            <div style="background: white; padding: 40px; border-radius: 8px;">
+              <h1 style="color: #303030;">Invitación a ${exampleData.eventName}</h1>
+              <p>Hola ${exampleData.name},</p>
+              <p>Estás invitado al evento: <strong>${exampleData.eventName}</strong></p>
+              <p>Fecha: ${exampleData.eventDate}</p>
+              <p>Ubicación: ${exampleData.eventLocation}</p>
+              <div style="margin: 20px 0; text-align: center;">
+                <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+    }
+
+    return NextResponse.json({ previewHTML });
+  } catch (error: any) {
+    console.error("Error generating preview:", error);
+    return NextResponse.json(
+      { error: error.message || "Error generating preview" },
+      { status: 500 }
+    );
+  }
+}

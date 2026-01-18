@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QRPositionEditorV2 } from "@/components/templates/qr-position-editor-v2";
 import { TemplateGallery } from "@/components/templates/template-gallery";
+import { InvitationPreview } from "@/components/templates/invitation-preview";
 import { TemplatePreset, replaceTemplatePlaceholders } from "@/lib/templates/presets";
 import { Upload, Image as ImageIcon, Code, Save, Sparkles, Palette } from "lucide-react";
 
@@ -396,44 +397,54 @@ export default function NewTemplatePage() {
           </Card>
         </div>
 
-        {/* HTML/CSS personalizado (opcional) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code className="w-5 h-5" />
-              HTML/CSS Personalizado (Opcional)
-            </CardTitle>
-            <CardDescription>
-              Si no subes una imagen, puedes usar HTML personalizado con placeholders: {"{{name}}"}, {"{{eventName}}"}, {"{{eventDate}}"}, {"{{eventLocation}}"}, {"{{qrImage}}"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="htmlContent" className="text-sm font-medium">
-                HTML Content
-              </label>
-              <textarea
-                id="htmlContent"
-                value={formData.htmlContent}
-                onChange={(e) => setFormData({ ...formData, htmlContent: e.target.value })}
-                className="flex min-h-[200px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono"
-                placeholder="<div>Hola {{name}}, estás invitado a {{eventName}}...</div>"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="cssContent" className="text-sm font-medium">
-                CSS Personalizado
-              </label>
-              <textarea
-                id="cssContent"
-                value={formData.cssContent}
-                onChange={(e) => setFormData({ ...formData, cssContent: e.target.value })}
-                className="flex min-h-[150px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono"
-                placeholder="body { font-family: Arial; }"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* HTML/CSS personalizado y Preview */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5" />
+                HTML/CSS Personalizado (Opcional)
+              </CardTitle>
+              <CardDescription>
+                Si no subes una imagen, puedes usar HTML personalizado con placeholders: {"{{name}}"}, {"{{eventName}}"}, {"{{eventDate}}"}, {"{{eventLocation}}"}, {"{{qrImage}}"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="htmlContent" className="text-sm font-medium">
+                  HTML Content
+                </label>
+                <textarea
+                  id="htmlContent"
+                  value={formData.htmlContent}
+                  onChange={(e) => setFormData({ ...formData, htmlContent: e.target.value })}
+                  className="flex min-h-[200px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono"
+                  placeholder="<div>Hola {{name}}, estás invitado a {{eventName}}...</div>"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="cssContent" className="text-sm font-medium">
+                  CSS Personalizado
+                </label>
+                <textarea
+                  id="cssContent"
+                  value={formData.cssContent}
+                  onChange={(e) => setFormData({ ...formData, cssContent: e.target.value })}
+                  className="flex min-h-[150px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono"
+                  placeholder="body { font-family: Arial; }"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Preview de la invitación */}
+          <InvitationPreview
+            htmlContent={formData.htmlContent}
+            cssContent={formData.cssContent}
+            backgroundImage={formData.backgroundImage}
+            qrSize={formData.qrSize}
+          />
+        </div>
 
         <div className="flex gap-4">
           <Button type="submit" disabled={loading || !formData.name}>
