@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { QRPositionEditorV2 } from "@/components/templates/qr-position-editor-v2";
+import { QRPositionEditorSimple } from "@/components/templates/qr-position-editor-simple";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { InvitationPreview } from "@/components/templates/invitation-preview";
 import { TemplatePreset, replaceTemplatePlaceholders } from "@/lib/templates/presets";
@@ -345,15 +345,21 @@ export default function NewTemplatePage() {
                   {/* Editor de posición del QR */}
                   <div className="border-t pt-4">
                     <h3 className="text-sm font-medium mb-2">Posición del QR</h3>
-                    <QRPositionEditorV2
+                    <QRPositionEditorSimple
                       backgroundImage={formData.backgroundImage}
                       onPositionChange={(pos) => setFormData({ 
                         ...formData, 
-                        qrPosition: formData.qrPosition 
-                          ? { ...formData.qrPosition, ...pos } 
-                          : pos 
+                        qrPosition: {
+                          zone: "custom",
+                          ...pos
+                        }
                       })}
-                      initialPosition={formData.qrPosition || undefined}
+                      initialPosition={formData.qrPosition ? {
+                        x: formData.qrPosition.x,
+                        y: formData.qrPosition.y,
+                        width: formData.qrPosition.width,
+                        height: formData.qrPosition.height,
+                      } : undefined}
                       qrSize={formData.qrSize}
                     />
                   </div>
