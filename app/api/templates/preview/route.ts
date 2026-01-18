@@ -15,6 +15,13 @@ export async function POST(request: NextRequest) {
     const exampleQRToken = "preview-token-example-" + Date.now();
     const qrImage = await generateQRImage(exampleQRToken);
 
+    // Función helper para generar link de Google Maps
+    const getGoogleMapsLink = (location: string) => {
+      if (!location) return "";
+      const encodedLocation = encodeURIComponent(location);
+      return `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`;
+    };
+
     // Datos de ejemplo para el preview
     const exampleData = {
       name: "Juan Pérez",
@@ -47,20 +54,17 @@ export async function POST(request: NextRequest) {
         `<img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px; display: block; margin: 20px auto;" />`
       );
       
-      // Reemplazar {{rsvpButtons}} con botones de ejemplo
+      // Reemplazar {{rsvpButtons}} con botón de confirmación (un solo botón)
       const rsvpButtons = `
         <div style="margin: 30px 0; text-align: center; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
           <h3 style="margin-bottom: 15px; color: #303030; font-size: 18px;">Confirma tu asistencia</h3>
-          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-            <a href="#" 
-               style="display: inline-block; padding: 12px 30px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              ✅ Confirmar Asistencia
-            </a>
-            <a href="#" 
-               style="display: inline-block; padding: 12px 30px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              ❌ No puedo asistir
-            </a>
-          </div>
+          <a href="#" 
+             style="display: inline-block; padding: 14px 40px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            ✅ Confirmar Asistencia
+          </a>
+          <p style="margin-top: 15px; font-size: 12px; color: #666;">
+            O haz clic <a href="#" style="color: #00b5ff; text-decoration: underline;">aquí</a> para más opciones
+          </p>
         </div>
       `;
       html = html.replace(/\{\{rsvpButtons\}\}/g, rsvpButtons);
@@ -194,7 +198,12 @@ export async function POST(request: NextRequest) {
               <p>Hola ${exampleData.name},</p>
               <p>Estás invitado al evento: <strong>${exampleData.eventName}</strong></p>
               <p>Fecha: ${exampleData.eventDate}</p>
-              <p>Ubicación: ${exampleData.eventLocation}</p>
+              <p>Ubicación: ${(() => {
+                const mapsLink = getGoogleMapsLink(exampleData.eventLocation);
+                return mapsLink 
+                  ? `<a href="${mapsLink}" target="_blank" style="color: #00b5ff; text-decoration: none;">${exampleData.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>`
+                  : exampleData.eventLocation;
+              })()}</p>
               <div style="margin: 20px 0; text-align: center;">
                 <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
               </div>
