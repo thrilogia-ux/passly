@@ -28,16 +28,38 @@ export async function combineBackgroundWithQR(
   }
 ): Promise<string> {
   try {
-    // Convertir ruta relativa a absoluta si es necesario
-    let bgPath = backgroundImagePath;
-    if (backgroundImagePath.startsWith("/")) {
-      bgPath = path.join(process.cwd(), "public", backgroundImagePath);
-    } else if (!path.isAbsolute(backgroundImagePath)) {
-      bgPath = path.join(process.cwd(), "public", backgroundImagePath);
-    }
+    let backgroundBuffer: Buffer;
+    
+    // NUEVO: Si es una URL HTTP/HTTPS (Vercel Blob Storage o cualquier URL), descargarla
+    if (backgroundImagePath.startsWith("http://") || backgroundImagePath.startsWith("https://")) {
+      try {
+        const response = await fetch(backgroundImagePath);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        backgroundBuffer = Buffer.from(arrayBuffer);
+      } catch (error: any) {
+        console.error("Error downloading image from URL:", error);
+        throw new Error(`Failed to download image from URL: ${error.message}`);
+      }
+    } else {
+      // Código existente para archivos locales
+      let bgPath = backgroundImagePath;
+      if (backgroundImagePath.startsWith("/")) {
+        bgPath = path.join(process.cwd(), "public", backgroundImagePath);
+      } else if (!path.isAbsolute(backgroundImagePath)) {
+        bgPath = path.join(process.cwd(), "public", backgroundImagePath);
+      }
 
-    // Leer imagen de fondo
-    const backgroundBuffer = fs.readFileSync(bgPath);
+      // Verificar que el archivo existe
+      if (!fs.existsSync(bgPath)) {
+        throw new Error(`Image file not found: ${bgPath}`);
+      }
+
+      // Leer imagen de fondo
+      backgroundBuffer = fs.readFileSync(bgPath);
+    }
     
     // Convertir QR data URL a buffer
     const qrBase64 = qrDataUrl.replace(/^data:image\/\w+;base64,/, "");
