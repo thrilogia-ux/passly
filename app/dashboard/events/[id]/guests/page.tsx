@@ -105,7 +105,7 @@ export default async function EventGuestsPage({
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-[#00b5ff]">{stats.total}</p>
+                <p className="text-2xl font-bold text-[#ff5040]">{stats.total}</p>
                 <p className="text-xs text-gray-600 mt-1">Total</p>
               </div>
             </CardContent>
@@ -165,7 +165,7 @@ export default async function EventGuestsPage({
                 </Button>
               </Link>
               <Link href={`/dashboard/events/${event.id}/send-invitations`}>
-                <Button className="bg-gradient-to-r from-[#00b5ff] to-[#0099cc]">
+                <Button className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40]">
                   <Mail className="w-4 h-4 mr-2" />
                   Enviar Invitaciones
                 </Button>

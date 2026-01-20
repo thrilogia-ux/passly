@@ -50,11 +50,13 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-12 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd] py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-[#00b5ff] to-[#0099cc] bg-clip-text text-transparent inline-block">
-            PASSLY
+          <Link href="/" className="inline-block">
+            <span className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent inline-block">
+              PASSLY
+            </span>
           </Link>
         </div>
         <Card className="border-gray-200 shadow-xl">
@@ -105,7 +107,7 @@ function LoginContent() {
             </form>
             <div className="mt-4 text-center text-sm text-gray-600">
               ¿No tienes cuenta?{" "}
-              <Link href="/register" className="text-[#00b5ff] hover:underline">
+              <Link href="/register" className="text-[#ff5040] hover:underline">
                 Regístrate gratis
               </Link>
             </div>
@@ -119,9 +121,9 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd]">
         <div className="text-center">
-          <div className="text-3xl font-bold bg-gradient-to-r from-[#00b5ff] to-[#0099cc] bg-clip-text text-transparent mb-4">
+          <div className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent mb-4">
             PASSLY
           </div>
           <p className="text-gray-600">Cargando...</p>

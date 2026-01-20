@@ -152,7 +152,7 @@ function ImportGuestsContent() {
         </p>
       </div>
 
-      <Card className="mb-6 border-2 border-[#00b5ff]/20">
+      <Card className="mb-6 border-2 border-[#ff5040]/20">
         <CardHeader>
           <CardTitle>Paso 1: Seleccionar Evento</CardTitle>
           <CardDescription>

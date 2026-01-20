@@ -158,7 +158,7 @@ export default function SendInvitationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#00b5ff]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#ff5040]" />
       </div>
     );
   }
@@ -206,7 +206,7 @@ export default function SendInvitationsPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-gray-600">Total Invitados</p>
-              <p className="text-2xl font-bold text-[#00b5ff]">{guestEvents.length}</p>
+              <p className="text-2xl font-bold text-[#ff5040]">{guestEvents.length}</p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Sin Invitación</p>
@@ -344,7 +344,7 @@ export default function SendInvitationsPage() {
                       className="flex-shrink-0"
                     >
                       {isSelected ? (
-                        <CheckSquare className="w-5 h-5 text-[#00b5ff]" />
+                        <CheckSquare className="w-5 h-5 text-[#ff5040]" />
                       ) : (
                         <Square className="w-5 h-5 text-gray-400" />
                       )}

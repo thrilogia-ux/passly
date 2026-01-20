@@ -41,7 +41,7 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <div key={index} className="relative">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#00b5ff] to-[#0099cc] flex items-center justify-center text-white text-2xl font-bold mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#ff5040] to-[#ff8a40] flex items-center justify-center text-white text-2xl font-bold mb-4">
                   {step.number}
                 </div>
                 <div className="text-4xl mb-4">{step.icon}</div>
@@ -53,7 +53,7 @@ export function HowItWorks() {
                 </p>
               </div>
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-[#00b5ff] to-transparent transform translate-x-4" />
+                <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-[#ff5040] to-transparent transform translate-x-4" />
               )}
             </div>
           ))}

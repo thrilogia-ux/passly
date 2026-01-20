@@ -34,10 +34,10 @@ export function EventSelector({ events, selectedEventId }: EventSelectorProps) {
   const selectedEvent = events.find(e => e.id === selectedEventId);
 
   return (
-    <Card className="mb-6 border-2 border-[#00b5ff]/20 bg-gradient-to-r from-blue-50 to-cyan-50">
+    <Card className="mb-6 border-2 border-[#ff5040]/20 bg-gradient-to-r from-[#fff1ec] to-[#ffe4dd]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#00b5ff]" />
+          <Calendar className="w-5 h-5 text-[#ff5040]" />
           Seleccionar Evento
         </CardTitle>
         <CardDescription>
@@ -75,9 +75,9 @@ export function EventSelector({ events, selectedEventId }: EventSelectorProps) {
           )}
         </div>
         {selectedEvent && (
-          <div className="mt-4 p-3 bg-white rounded-lg border border-[#00b5ff]/30">
+          <div className="mt-4 p-3 bg-white rounded-lg border border-[#ff5040]/30">
             <p className="text-sm font-medium text-[#303030]">
-              Evento seleccionado: <span className="text-[#00b5ff]">
+              Evento seleccionado: <span className="text-[#ff5040]">
                 {selectedEvent.name}
               </span>
             </p>

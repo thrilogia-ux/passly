@@ -171,7 +171,7 @@ export default function TokensPage() {
       </div>
 
       {/* Balance Card */}
-      <Card className="mb-6 bg-gradient-to-br from-[#00b5ff] to-[#0099cc] text-white border-0 shadow-lg">
+      <Card className="mb-6 bg-gradient-to-br from-[#ff5040] to-[#ff8a40] text-white border-0 shadow-lg">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -192,7 +192,7 @@ export default function TokensPage() {
           <Card
             key={pkg.tokens}
             className={`relative transition-all hover:shadow-lg ${
-              pkg.popular ? "ring-2 ring-[#00b5ff] scale-105" : ""
+              pkg.popular ? "ring-2 ring-[#ff5040] scale-105" : ""
             }`}
           >
             {pkg.popular && (

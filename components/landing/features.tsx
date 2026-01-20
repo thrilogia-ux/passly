@@ -47,7 +47,7 @@ export function Features() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} className="border-gray-200 hover:border-[#00b5ff] hover:shadow-lg transition-all">
+            <Card key={index} className="border-gray-200 hover:border-[#ff5040] hover:shadow-lg transition-all">
               <CardHeader>
                 <div className="text-4xl mb-2">{feature.icon}</div>
                 <CardTitle className="text-xl">{feature.title}</CardTitle>

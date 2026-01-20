@@ -149,9 +149,9 @@ export default async function DashboardPage() {
         {/* Widget Check-in - Solo visible para Admin y Staff */}
         {(session.user.role === "SUPER_ADMIN" || session.user.role === "STAFF" || session.user.role === "ORGANIZER") && (
           <Link href="/dashboard/check-in">
-            <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 group overflow-hidden">
+            <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-orange-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-[#fff1ec] via-[#ffe4dd] to-orange-50 group overflow-hidden">
               <CardContent className="p-7 flex flex-col items-center justify-center text-center min-h-[200px]">
-                <div className="w-18 h-18 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
+                <div className="w-18 h-18 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
                   <QrCode className="w-9 h-9 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#303030] mb-2 tracking-tight">Check-in</h3>
@@ -203,15 +203,15 @@ export default async function DashboardPage() {
 
       {/* Estadísticas Globales - Cards estilo Apple */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-        <Card className="border-0 bg-gradient-to-br from-blue-50 to-sky-50 hover:shadow-xl hover:shadow-blue-100/30 transition-all duration-300">
+        <Card className="border-0 bg-gradient-to-br from-[#fff1ec] to-[#ffe4dd] hover:shadow-xl hover:shadow-orange-100/30 transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-blue-600/70 tracking-wide mb-1">Total Invitados</p>
-                <p className="text-4xl font-semibold text-blue-900 mt-1 tracking-tight">{totalGuests}</p>
+                <p className="text-xs font-medium text-orange-600/70 tracking-wide mb-1">Total Invitados</p>
+                <p className="text-4xl font-semibold text-orange-900 mt-1 tracking-tight">{totalGuests}</p>
               </div>
-              <div className="w-14 h-14 bg-blue-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <Users className="w-7 h-7 text-blue-600" />
+              <div className="w-14 h-14 bg-orange-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                <Users className="w-7 h-7 text-orange-600" />
               </div>
             </div>
           </CardContent>
@@ -289,7 +289,7 @@ export default async function DashboardPage() {
               <p className="text-gray-500 text-lg font-medium mb-2">No hay eventos activos</p>
               <p className="text-gray-400 text-sm mb-4">Crea tu primer evento para comenzar</p>
               <Link href="/dashboard/events/new">
-                <Button className="bg-gradient-to-r from-[#00b5ff] to-[#0099cc]">
+                <Button className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40]">
                   <Calendar className="w-4 h-4 mr-2" />
                   Crear Primer Evento
                 </Button>

@@ -58,16 +58,16 @@ export async function generateInvitationWithQR(
   
   // Botón de confirmación RSVP - UN SOLO BOTÓN
   const rsvpButtons = confirmUrl ? `
-    <div style="margin: 30px 0; text-align: center; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
-      <h3 style="margin-bottom: 15px; color: #303030; font-size: 18px;">Confirma tu asistencia</h3>
-      <a href="${confirmUrl}?response=YES" 
-         style="display: inline-block; padding: 14px 40px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        ✅ Confirmar Asistencia
-      </a>
-      <p style="margin-top: 15px; font-size: 12px; color: #666;">
-        O haz clic <a href="${confirmUrl}" style="color: #00b5ff; text-decoration: underline;">aquí</a> para más opciones
-      </p>
-    </div>
+       <div style="margin: 30px 0; text-align: center; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+         <h3 style="margin-bottom: 15px; color: #303030; font-size: 18px;">Confirma tu asistencia</h3>
+         <a href="${confirmUrl}?response=YES" 
+            style="display: inline-block; padding: 14px 40px; background-color: #ff5040; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+           ✅ Confirmar Asistencia
+         </a>
+         <p style="margin-top: 15px; font-size: 12px; color: #666;">
+           O haz clic <a href="${confirmUrl}" style="color: #ff5040; text-decoration: underline;">aquí</a> para más opciones
+         </p>
+       </div>
   ` : "";
 
   // Si hay imagen de fondo, combinar con QR en la posición especificada
@@ -113,7 +113,7 @@ export async function generateInvitationWithQR(
       html = html.replace(/{{eventDate}}/g, data.eventDate);
       
       // Reemplazar {{eventLocation}} con link de Google Maps si existe ubicación
-      const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
+         const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
       if (mapsLink) {
         html = html.replace(
           /{{eventLocation}}/g, 
@@ -138,16 +138,16 @@ export async function generateInvitationWithQR(
             <p style="color: #666; font-size: 14px;">${data.eventDate}</p>
             ${data.eventLocation ? `
               <p style="color: #303030; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">📍 Ubicación:</p>
-              ${mapsLink ? `
-                <p style="color: #666; font-size: 14px;">
-                  <a href="${mapsLink}" target="_blank" style="color: #00b5ff; text-decoration: none; border-bottom: 1px solid #00b5ff;">
-                    ${data.eventLocation}
-                  </a>
-                  <span style="font-size: 11px; color: #999; margin-left: 5px;">(Ver en Google Maps)</span>
-                </p>
-              ` : `
-                <p style="color: #666; font-size: 14px;">${data.eventLocation}</p>
-              `}
+                 ${mapsLink ? `
+                   <p style="color: #666; font-size: 14px;">
+                     <a href="${mapsLink}" target="_blank" style="color: #ff5040; text-decoration: none; border-bottom: 1px solid #ff5040;">
+                       ${data.eventLocation}
+                     </a>
+                     <span style="font-size: 11px; color: #999; margin-left: 5px;">(Ver en Google Maps)</span>
+                   </p>
+                 ` : `
+                   <p style="color: #666; font-size: 14px;">${data.eventLocation}</p>
+                 `}
             ` : ""}
           </div>
         </div>
@@ -262,7 +262,7 @@ export async function generateInvitationWithQR(
   }
 
   // Template por defecto
-  const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
+       const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
   return `
     <!DOCTYPE html>
     <html>
@@ -284,9 +284,9 @@ export async function generateInvitationWithQR(
         <p>Hola ${data.name},</p>
         <p>Estás invitado al evento: <strong>${data.eventName}</strong></p>
         <p>Fecha: ${data.eventDate}</p>
-        ${data.eventLocation ? `
-          <p>Ubicación: ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="color: #00b5ff; text-decoration: none;">${data.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>` : data.eventLocation}</p>
-        ` : ""}
+             ${data.eventLocation ? `
+               <p>Ubicación: ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="color: #ff5040; text-decoration: none;">${data.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>` : data.eventLocation}</p>
+             ` : ""}
         <div style="margin: 20px 0; text-align: center;">
           <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
           <p style="font-size: 12px; color: #666; margin-top: 10px;">Presenta este código QR en el evento</p>

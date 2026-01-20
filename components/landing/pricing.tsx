@@ -25,7 +25,7 @@ export function Pricing() {
 
         {/* Free Plan */}
         <div className="mb-16">
-          <Card className="max-w-md mx-auto border-2 border-[#00b5ff] shadow-xl">
+          <Card className="max-w-md mx-auto border-2 border-[#ff5040] shadow-xl">
             <CardHeader className="text-center">
               <div className="inline-block px-3 py-1 bg-[#cdfa55] text-[#303030] rounded-full text-sm font-semibold mb-2">
                 PLAN GRATIS
@@ -38,23 +38,23 @@ export function Pricing() {
             <CardContent>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-gray-700">
-                  <span className="text-[#00b5ff] mr-2">✓</span>
+                  <span className="text-[#ff5040] mr-2">✓</span>
                   10 invitaciones gratis
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <span className="text-[#00b5ff] mr-2">✓</span>
+                  <span className="text-[#ff5040] mr-2">✓</span>
                   Diseño personalizado
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <span className="text-[#00b5ff] mr-2">✓</span>
+                  <span className="text-[#ff5040] mr-2">✓</span>
                   QR único por invitación
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <span className="text-[#00b5ff] mr-2">✓</span>
+                  <span className="text-[#ff5040] mr-2">✓</span>
                   Check-in con QR
                 </li>
                 <li className="flex items-center text-gray-700">
-                  <span className="text-[#00b5ff] mr-2">✓</span>
+                  <span className="text-[#ff5040] mr-2">✓</span>
                   RSVP integrado
                 </li>
               </ul>
@@ -83,13 +83,13 @@ export function Pricing() {
                 key={index}
                 className={`relative border-2 transition-all hover:shadow-xl ${
                   pack.popular
-                    ? "border-[#00b5ff] shadow-lg scale-105"
+                    ? "border-[#ff5040] shadow-lg scale-105"
                     : "border-gray-200"
                 }`}
               >
                 {pack.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-[#00b5ff] to-[#0099cc] text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <span className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40] text-white px-3 py-1 rounded-full text-xs font-semibold">
                       MÁS POPULAR
                     </span>
                   </div>
@@ -111,15 +111,15 @@ export function Pricing() {
                 <CardContent>
                   <ul className="space-y-2 text-sm text-gray-700">
                     <li className="flex items-center">
-                      <span className="text-[#00b5ff] mr-2">✓</span>
+                      <span className="text-[#ff5040] mr-2">✓</span>
                       {pack.tokens} invitaciones
                     </li>
                     <li className="flex items-center">
-                      <span className="text-[#00b5ff] mr-2">✓</span>
+                      <span className="text-[#ff5040] mr-2">✓</span>
                       Sin expiración
                     </li>
                     <li className="flex items-center">
-                      <span className="text-[#00b5ff] mr-2">✓</span>
+                      <span className="text-[#ff5040] mr-2">✓</span>
                       Uso ilimitado
                     </li>
                   </ul>

@@ -67,10 +67,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-[#00b5ff] to-[#0099cc] bg-clip-text text-transparent inline-block">
+          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent inline-block">
             PASSLY
           </Link>
           <h2 className="mt-4 text-2xl font-bold text-gray-900">
@@ -78,7 +78,7 @@ export default function RegisterPage() {
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-[#00b5ff] hover:underline">
+            <Link href="/login" className="text-[#ff5040] hover:underline">
               Inicia sesión
             </Link>
           </p>
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                     onClick={() => setFormData({ ...formData, accountType: "CLIENT" })}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${
                       formData.accountType === "CLIENT"
-                        ? "border-[#00b5ff] bg-blue-50"
+                        ? "border-[#ff5040] bg-[#ffe4dd]"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                     onClick={() => setFormData({ ...formData, accountType: "ORGANIZER" })}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${
                       formData.accountType === "ORGANIZER"
-                        ? "border-[#00b5ff] bg-blue-50"
+                        ? "border-[#ff5040] bg-[#ffe4dd]"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
@@ -200,11 +200,11 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-xs text-gray-500">
           Al registrarte, aceptas nuestros{" "}
-          <Link href="#" className="text-[#00b5ff] hover:underline">
+          <Link href="#" className="text-[#ff5040] hover:underline">
             Términos de Servicio
           </Link>{" "}
           y{" "}
-          <Link href="#" className="text-[#00b5ff] hover:underline">
+          <Link href="#" className="text-[#ff5040] hover:underline">
             Política de Privacidad
           </Link>
         </p>

@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
         <div style="margin: 30px 0; text-align: center; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
           <h3 style="margin-bottom: 15px; color: #303030; font-size: 18px;">Confirma tu asistencia</h3>
           <a href="#" 
-             style="display: inline-block; padding: 14px 40px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+             style="display: inline-block; padding: 14px 40px; background-color: #ff5040; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             ✅ Confirmar Asistencia
           </a>
           <p style="margin-top: 15px; font-size: 12px; color: #666;">
-            O haz clic <a href="#" style="color: #00b5ff; text-decoration: underline;">aquí</a> para más opciones
+            O haz clic <a href="#" style="color: #ff5040; text-decoration: underline;">aquí</a> para más opciones
           </p>
         </div>
       `;
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
               <p>Ubicación: ${(() => {
                 const mapsLink = getGoogleMapsLink(exampleData.eventLocation);
                 return mapsLink 
-                  ? `<a href="${mapsLink}" target="_blank" style="color: #00b5ff; text-decoration: none;">${exampleData.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>`
+                  ? `<a href="${mapsLink}" target="_blank" style="color: #ff5040; text-decoration: none;">${exampleData.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>`
                   : exampleData.eventLocation;
               })()}</p>
               <div style="margin: 20px 0; text-align: center;">

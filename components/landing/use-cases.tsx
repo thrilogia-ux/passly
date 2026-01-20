@@ -35,7 +35,7 @@ export function UseCases() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {useCases.map((useCase, index) => (
-            <Card key={index} className="border-gray-200 hover:border-[#00b5ff] hover:shadow-xl transition-all">
+            <Card key={index} className="border-gray-200 hover:border-[#ff5040] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="text-5xl mb-4">{useCase.icon}</div>
                 <CardTitle className="text-2xl">{useCase.title}</CardTitle>
@@ -47,7 +47,7 @@ export function UseCases() {
                 <ul className="space-y-2">
                   {useCase.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center text-sm text-gray-700">
-                      <span className="text-[#00b5ff] mr-2">✓</span>
+                      <span className="text-[#ff5040] mr-2">✓</span>
                       {feature}
                     </li>
                   ))}

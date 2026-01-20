@@ -140,7 +140,7 @@ export default async function EventDetailPage({
                   <Button>Gestionar Invitados</Button>
                 </Link>
                 <Link href={`/dashboard/events/${event.id}/send-invitations`}>
-                  <Button className="bg-gradient-to-r from-[#00b5ff] to-[#0099cc] text-white hover:from-[#0099cc] hover:to-[#0088bb]">
+                  <Button className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40] text-white hover:from-[#e04334] hover:to-[#ff7240]">
                     <Mail className="w-4 h-4 mr-2" />
                     Enviar Invitaciones
                   </Button>
