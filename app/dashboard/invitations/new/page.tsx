@@ -174,7 +174,7 @@ function NewInvitationContent() {
               {templates.length === 0 && (
                 <p className="text-xs text-gray-500">
                   No hay templates disponibles. Crea uno en{" "}
-                  <Link href="/dashboard/templates" className="text-blue-600 hover:underline">
+                  <Link href="/dashboard/templates" className="text-[#ff5040] hover:underline">
                     Templates
                   </Link>
                 </p>

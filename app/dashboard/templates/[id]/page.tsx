@@ -114,7 +114,7 @@ export default async function TemplateDetailPage({
                   />
                   {qrPosition && (
                     <div
-                      className="absolute border-2 border-blue-500 bg-blue-500/20"
+                    className="absolute border-2 border-[#ff5040] bg-[#ff5040]/20"
                       style={{
                         left: `${qrPosition.x}px`,
                         top: `${qrPosition.y}px`,
@@ -123,7 +123,7 @@ export default async function TemplateDetailPage({
                       }}
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-xs text-blue-600 bg-white/80 px-2 py-1 rounded">
+                        <div className="text-xs text-[#ff5040] bg-white/80 px-2 py-1 rounded">
                           QR Code
                         </div>
                       </div>

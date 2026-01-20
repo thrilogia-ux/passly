@@ -74,7 +74,7 @@ export default async function InvitationsPage({
         case "PENDING":
           return "bg-gray-100 text-gray-800";
         case "SENT":
-          return "bg-blue-100 text-blue-800";
+          return "bg-orange-100 text-orange-800";
         case "CONFIRMED":
           return "bg-green-100 text-green-800";
         case "REJECTED":

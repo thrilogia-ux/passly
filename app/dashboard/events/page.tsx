@@ -50,7 +50,7 @@ export default async function EventsPage() {
         case "ACTIVE":
           return "bg-green-100 text-green-800";
         case "COMPLETED":
-          return "bg-blue-100 text-blue-800";
+          return "bg-orange-100 text-orange-800";
         default:
           return "bg-gray-100 text-gray-800";
       }

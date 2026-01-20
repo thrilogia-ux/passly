@@ -219,10 +219,10 @@ function CheckInContent() {
       </div>
 
       {/* Instructions */}
-      <Card className="mt-6 bg-blue-50 border-blue-200">
+      <Card className="mt-6 bg-[#ffe4dd] border-orange-200">
         <CardContent className="pt-6">
-          <h3 className="font-semibold text-blue-900 mb-2">Instrucciones:</h3>
-          <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+          <h3 className="font-semibold text-orange-900 mb-2">Instrucciones:</h3>
+          <ul className="text-sm text-orange-800 space-y-1 list-disc list-inside">
             <li>Para escanear con cámara: presiona "Activar Cámara" y apunta al código QR</li>
             <li>Para ingreso manual: copia y pega el token del código QR</li>
             <li>El sistema validará automáticamente el código y registrará el check-in</li>

@@ -346,9 +346,9 @@ export default async function DashboardPage() {
                   <CardContent>
                     {/* Estadísticas del evento en grid */}
                     <div className="grid grid-cols-2 gap-3 mb-5">
-                      <div className="bg-blue-50/80 rounded-2xl p-4 border-0 backdrop-blur-sm">
-                        <p className="text-xs text-blue-600/70 font-medium mb-1.5">Invitados</p>
-                        <p className="text-2xl font-semibold text-blue-900 tracking-tight">{eventGuests}</p>
+                      <div className="bg-[#ffe4dd]/80 rounded-2xl p-4 border-0 backdrop-blur-sm">
+                        <p className="text-xs text-orange-600/70 font-medium mb-1.5">Invitados</p>
+                        <p className="text-2xl font-semibold text-orange-900 tracking-tight">{eventGuests}</p>
                       </div>
                       <div className="bg-emerald-50/80 rounded-2xl p-4 border-0 backdrop-blur-sm">
                         <p className="text-xs text-emerald-600/70 font-medium mb-1.5">Confirmados</p>

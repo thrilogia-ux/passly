@@ -170,7 +170,7 @@ export default function SendInvitationsPage() {
     const status = ge.invitation.status as InvitationStatus;
     const badges: Record<InvitationStatus, string> = {
       [InvitationStatus.PENDING]: "bg-yellow-100 text-yellow-800",
-      [InvitationStatus.SENT]: "bg-blue-100 text-blue-800",
+      [InvitationStatus.SENT]: "bg-orange-100 text-orange-800",
       [InvitationStatus.CONFIRMED]: "bg-green-100 text-green-800",
       [InvitationStatus.REJECTED]: "bg-red-100 text-red-800",
     };
@@ -204,7 +204,7 @@ export default function SendInvitationsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-[#ffe4dd] rounded-lg">
               <p className="text-sm text-gray-600">Total Invitados</p>
               <p className="text-2xl font-bold text-[#ff5040]">{guestEvents.length}</p>
             </div>
@@ -334,7 +334,7 @@ export default function SendInvitationsPage() {
                   <div
                     key={ge.id}
                     className={`flex items-center gap-3 p-3 border rounded-lg transition-colors ${
-                      isSelected ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50"
+                      isSelected ? "bg-[#ffe4dd] border-orange-300" : "hover:bg-gray-50"
                     } ${!canSend ? "opacity-60" : ""}`}
                   >
                     <button
