@@ -3,12 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #303030;
-  --primary: #00b5ff;
-  --primary-dark: #0099cc;
-  --secondary: #cdfa55;
-  --accent: #ff6b6b;
-  --muted: #f5f5f5;
-  --border: #e5e5e5;
+  /* Nueva paleta basada en #ff5040 */
+  --primary: #ff5040;
+  --primary-dark: #e04334;
+  --secondary: #ffe4dd;
+  --accent: #ff8a40;
+  --muted: #f9f5f3;
+  --border: #f0d0c6;
 }
 
 @theme inline {
