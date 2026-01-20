@@ -7,10 +7,8 @@ export function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
         <div className="text-center">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 mb-6">
-            Invitaciones Digitales
-            <br />
             <span className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent">
-              que Impresionan
+              Smart access para eventos modernos
             </span>
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
