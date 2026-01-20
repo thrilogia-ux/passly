@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,8 +71,14 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent inline-block">
-            PASSLY
+          <Link href="/" className="inline-block">
+            <Image
+              src="/passly-logo.svg"
+              alt="PASSLY"
+              width={160}
+              height={60}
+              priority
+            />
           </Link>
           <h2 className="mt-4 text-2xl font-bold text-gray-900">
             Crea tu cuenta gratis

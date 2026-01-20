@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,9 +55,13 @@ function LoginContent() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <span className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent inline-block">
-              PASSLY
-            </span>
+            <Image
+              src="/passly-logo.svg"
+              alt="PASSLY"
+              width={160}
+              height={60}
+              priority
+            />
           </Link>
         </div>
         <Card className="border-gray-200 shadow-xl">
@@ -123,9 +128,13 @@ export default function LoginPage() {
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd]">
         <div className="text-center">
-          <div className="text-3xl font-bold bg-gradient-to-r from-[#ff5040] to-[#ff8a40] bg-clip-text text-transparent mb-4">
-            PASSLY
-          </div>
+          <Image
+            src="/passly-logo.svg"
+            alt="PASSLY"
+            width={160}
+            height={60}
+            priority
+          />
           <p className="text-gray-600">Cargando...</p>
         </div>
       </div>

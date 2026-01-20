@@ -2,13 +2,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import Image from "next/image";
 import { UserMenu } from "@/components/auth/user-menu";
 import { 
   Calendar, 
   Users, 
   Mail, 
   QrCode, 
-  Sparkles,
   FileText
 } from "lucide-react";
 
@@ -61,12 +61,14 @@ export default async function DashboardLayout({
           <div className="flex h-20 items-center justify-between">
             <div className="flex items-center space-x-10">
               <Link href="/dashboard" className="flex items-center space-x-3 group">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-semibold bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-transparent tracking-tight">
-                  PASSLY
-                </span>
+                <Image
+                  src="/passly-logo.svg"
+                  alt="PASSLY"
+                  width={150}
+                  height={56}
+                  priority
+                  className="transition-transform duration-300 group-hover:scale-105 group-hover:translate-y-0.5"
+                />
               </Link>
               <nav className="hidden md:flex space-x-2">
                 {navItems.map((item) => {
