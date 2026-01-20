@@ -97,65 +97,39 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8 pb-8">
-      {/* Header con bienvenida - Estilo Apple */}
-      <div className="flex items-start justify-between pb-2">
-        <div>
-          <h1 className="text-4xl font-semibold text-[#303030] tracking-tight mb-2">
+    <div className="space-y-6 md:space-y-8 pb-6 md:pb-8">
+      {/* Header con bienvenida - Mejorado para mobile */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-[#303030] tracking-tight mb-2">
             Hola, {session.user.name || session.user.email?.split("@")[0]} 👋
           </h1>
-          <p className="text-lg text-gray-500 font-light">
+          <p className="text-base sm:text-lg text-gray-500 font-light">
             {activeEvents.length > 0 
               ? `${activeEvents.length} ${activeEvents.length === 1 ? 'evento activo' : 'eventos activos'}`
               : "No hay eventos activos"}
           </p>
         </div>
-        <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100/50">
-          <Sparkles className="w-5 h-5 text-amber-500" />
-          <span className="text-sm font-medium text-amber-700">PASSLY</span>
+        <div className="flex items-center gap-3 px-3 sm:px-4 py-2 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100/50 shrink-0">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+          <span className="text-xs sm:text-sm font-medium text-amber-700">PASSLY</span>
         </div>
       </div>
 
-      {/* Botón de acceso rápido al escáner QR - Solo para Admin y Staff */}
-      {(session.user.role === "SUPER_ADMIN" || session.user.role === "STAFF" || session.user.role === "ORGANIZER") && (
-        <div className="mb-8">
-          <Link href="/dashboard/check-in">
-            <Card className="border-0 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 hover:shadow-2xl hover:shadow-orange-200/50 transition-all duration-300 cursor-pointer group overflow-hidden">
-              <CardContent className="p-8 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className="w-20 h-20 bg-white/25 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <Camera className="w-10 h-10 text-white drop-shadow-lg" />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-semibold text-white mb-2 tracking-tight">Escanear QR Rápido</h2>
-                      <p className="text-white/90 text-base font-light">Acceso directo a la cámara para check-in</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-white bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl group-hover:bg-white/30 transition-all">
-                    <span className="text-base font-medium">Abrir Cámara</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-      )}
-
-      {/* Widgets de Acceso Rápido - Estilo Apple */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Widget Check-in - Solo visible para Admin y Staff */}
+      {/* Widgets de Acceso Rápido - Mejorado para mobile */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+        {/* Widget Check-in - Mejorado y más prominente */}
         {(session.user.role === "SUPER_ADMIN" || session.user.role === "STAFF" || session.user.role === "ORGANIZER") && (
           <Link href="/dashboard/check-in">
-            <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-orange-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-[#fff1ec] via-[#ffe4dd] to-orange-50 group overflow-hidden">
-              <CardContent className="p-7 flex flex-col items-center justify-center text-center min-h-[200px]">
-                <div className="w-18 h-18 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
-                  <QrCode className="w-9 h-9 text-white" />
+            <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-orange-100/50 transition-all duration-300 border-2 border-orange-200/50 bg-gradient-to-br from-[#ff5040] via-orange-500 to-orange-400 group overflow-hidden shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-7 flex flex-col items-center justify-center text-center min-h-[160px] sm:min-h-[180px] md:min-h-[200px]">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-white/30 backdrop-blur-sm rounded-2xl sm:rounded-3xl flex items-center justify-center mb-3 sm:mb-4 md:mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-3 sm:p-4">
+                  <Camera className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#303030] mb-2 tracking-tight">Check-in</h3>
-                <p className="text-sm text-gray-500 font-light">Escanear QR</p>
+                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-1 sm:mb-2 tracking-tight">
+                  Check-in
+                </h3>
+                <p className="text-xs sm:text-sm text-white/90 font-light">Escanear QR</p>
               </CardContent>
             </Card>
           </Link>
@@ -164,12 +138,16 @@ export default async function DashboardPage() {
         {/* Widget Eventos */}
         <Link href="/dashboard/events">
           <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 group overflow-hidden">
-            <CardContent className="p-7 flex flex-col items-center justify-center text-center min-h-[200px]">
-              <div className="w-18 h-18 bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
-                <Calendar className="w-9 h-9 text-white" />
+            <CardContent className="p-4 sm:p-6 md:p-7 flex flex-col items-center justify-center text-center min-h-[160px] sm:min-h-[180px] md:min-h-[200px]">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-3 sm:mb-4 md:mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-3 sm:p-4">
+                <Calendar className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-[#303030] mb-2 tracking-tight">Eventos</h3>
-              <p className="text-sm text-gray-500 font-light">{activeEvents.length} activos</p>
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-[#303030] mb-1 sm:mb-2 tracking-tight">
+                Eventos
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 font-light">
+                {activeEvents.length} activos
+              </p>
             </CardContent>
           </Card>
         </Link>
@@ -177,12 +155,16 @@ export default async function DashboardPage() {
         {/* Widget Invitados */}
         <Link href="/dashboard/guests">
           <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-green-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 group overflow-hidden">
-            <CardContent className="p-7 flex flex-col items-center justify-center text-center min-h-[200px]">
-              <div className="w-18 h-18 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
-                <Users className="w-9 h-9 text-white" />
+            <CardContent className="p-4 sm:p-6 md:p-7 flex flex-col items-center justify-center text-center min-h-[160px] sm:min-h-[180px] md:min-h-[200px]">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-3 sm:mb-4 md:mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-3 sm:p-4">
+                <Users className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-[#303030] mb-2 tracking-tight">Invitados</h3>
-              <p className="text-sm text-gray-500 font-light">{totalGuests} total</p>
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-[#303030] mb-1 sm:mb-2 tracking-tight">
+                Invitados
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 font-light">
+                {totalGuests} total
+              </p>
             </CardContent>
           </Card>
         </Link>
@@ -190,91 +172,114 @@ export default async function DashboardPage() {
         {/* Widget Reportes */}
         <Link href="/dashboard/reports">
           <Card className="h-full cursor-pointer hover:shadow-2xl hover:shadow-amber-100/50 transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 group overflow-hidden">
-            <CardContent className="p-7 flex flex-col items-center justify-center text-center min-h-[200px]">
-              <div className="w-18 h-18 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-4">
-                <TrendingUp className="w-9 h-9 text-white" />
+            <CardContent className="p-4 sm:p-6 md:p-7 flex flex-col items-center justify-center text-center min-h-[160px] sm:min-h-[180px] md:min-h-[200px]">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-3 sm:mb-4 md:mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 p-3 sm:p-4">
+                <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-[#303030] mb-2 tracking-tight">Reportes</h3>
-              <p className="text-sm text-gray-500 font-light">Estadísticas</p>
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-[#303030] mb-1 sm:mb-2 tracking-tight">
+                Reportes
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 font-light">
+                Estadísticas
+              </p>
             </CardContent>
           </Card>
         </Link>
       </div>
 
-      {/* Estadísticas Globales - Cards estilo Apple */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      {/* Estadísticas Globales - Mejorado para mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
         <Card className="border-0 bg-gradient-to-br from-[#fff1ec] to-[#ffe4dd] hover:shadow-xl hover:shadow-orange-100/30 transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-orange-600/70 tracking-wide mb-1">Total Invitados</p>
-                <p className="text-4xl font-semibold text-orange-900 mt-1 tracking-tight">{totalGuests}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-orange-600/70 tracking-wide mb-1">
+                  Total Invitados
+                </p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-orange-900 mt-1 tracking-tight">
+                  {totalGuests}
+                </p>
               </div>
-              <div className="w-14 h-14 bg-orange-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <Users className="w-7 h-7 text-orange-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-orange-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-gradient-to-br from-emerald-50 to-teal-50 hover:shadow-xl hover:shadow-green-100/30 transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-emerald-600/70 tracking-wide mb-1">Confirmados</p>
-                <p className="text-4xl font-semibold text-emerald-900 mt-1 tracking-tight">{totalConfirmed}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-emerald-600/70 tracking-wide mb-1">
+                  Confirmados
+                </p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-emerald-900 mt-1 tracking-tight">
+                  {totalConfirmed}
+                </p>
               </div>
-              <div className="w-14 h-14 bg-emerald-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <CheckCircle className="w-7 h-7 text-emerald-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-emerald-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-emerald-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-xl hover:shadow-amber-100/30 transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-amber-600/70 tracking-wide mb-1">Pendientes</p>
-                <p className="text-4xl font-semibold text-amber-900 mt-1 tracking-tight">{totalPendingInvitations}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-amber-600/70 tracking-wide mb-1">
+                  Pendientes
+                </p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-amber-900 mt-1 tracking-tight">
+                  {totalPendingInvitations}
+                </p>
               </div>
-              <div className="w-14 h-14 bg-amber-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <Clock className="w-7 h-7 text-amber-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-amber-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm shrink-0">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-amber-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-gradient-to-br from-purple-50 to-pink-50 hover:shadow-xl hover:shadow-purple-100/30 transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-purple-600/70 tracking-wide mb-1">Check-ins</p>
-                <p className="text-4xl font-semibold text-purple-900 mt-1 tracking-tight">{totalCheckIns}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-purple-600/70 tracking-wide mb-1">
+                  Check-ins
+                </p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-purple-900 mt-1 tracking-tight">
+                  {totalCheckIns}
+                </p>
               </div>
-              <div className="w-14 h-14 bg-purple-200/50 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <QrCode className="w-7 h-7 text-purple-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm shrink-0">
+                <QrCode className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Eventos Activos - Cards detallados */}
+      {/* Eventos Activos - Mejorado para mobile */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-semibold text-[#303030] tracking-tight">Eventos Activos</h2>
-          <div className="flex gap-3">
-            <Link href="/dashboard/events/new">
-              <Button size="sm" className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white border-0 rounded-2xl px-5 py-2.5 shadow-lg hover:shadow-xl transition-all duration-300">
-                <Calendar className="w-4 h-4 mr-2" />
-                Nuevo Evento
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-[#303030] tracking-tight">
+            Eventos Activos
+          </h2>
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
+            <Link href="/dashboard/events/new" className="flex-1 sm:flex-none">
+              <Button size="sm" className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white border-0 rounded-2xl px-4 sm:px-5 py-2 sm:py-2.5 shadow-lg hover:shadow-xl transition-all duration-300 text-xs sm:text-sm">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Nuevo Evento</span>
+                <span className="sm:hidden">Nuevo</span>
               </Button>
             </Link>
-            <Link href="/dashboard/events">
-              <Button variant="outline" size="sm" className="rounded-2xl px-5 py-2.5 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-300">
-                Ver Todos
-                <ArrowRight className="w-4 h-4 ml-2" />
+            <Link href="/dashboard/events" className="flex-1 sm:flex-none">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto rounded-2xl px-4 sm:px-5 py-2 sm:py-2.5 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 text-xs sm:text-sm">
+                <span>Ver Todos</span>
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" />
               </Button>
             </Link>
           </div>
