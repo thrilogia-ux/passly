@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Coins, ShoppingCart, History, CreditCard, Building2, X, CheckCircle } from "lucide-react";
 
-type PaymentMethod = "mercadopago" | "paypal" | "bank" | null;
+type PaymentMethod = "mercadopago" | "bank" | null;
 
 export default function TokensPage() {
   const [balance, setBalance] = useState(0);
@@ -81,30 +81,6 @@ export default function TokensPage() {
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       }
-    } catch (error: any) {
-      alert(error.message || "Error al procesar el pago");
-      setPurchasing(false);
-    }
-  };
-
-  const handlePayPal = async () => {
-    setPurchasing(true);
-    try {
-      const res = await fetch("/api/payments/paypal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tokens: amount, amount: amount * 0.1 }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Error creating PayPal payment");
-      }
-
-      const data = await res.json();
-      // Aquí redirigirías a PayPal
-      alert("Integración de PayPal en desarrollo. Por favor, usa otro método de pago.");
-      setPurchasing(false);
-      setShowPaymentModal(false);
     } catch (error: any) {
       alert(error.message || "Error al procesar el pago");
       setPurchasing(false);
@@ -216,14 +192,6 @@ export default function TokensPage() {
               </Button>
               <Button
                 className="w-full"
-                onClick={() => handlePackageSelect(pkg.tokens, "paypal")}
-                disabled={purchasing}
-                variant="outline"
-              >
-                PayPal
-              </Button>
-              <Button
-                className="w-full"
                 onClick={() => handlePackageSelect(pkg.tokens, "bank")}
                 disabled={purchasing}
                 variant="secondary"
@@ -262,13 +230,6 @@ export default function TokensPage() {
                 MercadoPago
               </Button>
               <Button
-                onClick={() => handlePackageSelect(amount, "paypal")}
-                disabled={purchasing || amount < 1}
-                variant="outline"
-              >
-                PayPal
-              </Button>
-              <Button
                 onClick={() => handlePackageSelect(amount, "bank")}
                 disabled={purchasing || amount < 1}
                 variant="secondary"
@@ -291,7 +252,6 @@ export default function TokensPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>
                 {selectedPaymentMethod === "mercadopago" && "Pagar con MercadoPago"}
-                {selectedPaymentMethod === "paypal" && "Pagar con PayPal"}
                 {selectedPaymentMethod === "bank" && "Transferencia Bancaria"}
               </CardTitle>
               <Button
@@ -325,22 +285,6 @@ export default function TokensPage() {
                     className="w-full"
                   >
                     {purchasing ? "Procesando..." : "Continuar a MercadoPago"}
-                  </Button>
-                </div>
-              )}
-
-              {selectedPaymentMethod === "paypal" && (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Serás redirigido a PayPal para completar el pago.
-                  </p>
-                  <Button
-                    onClick={handlePayPal}
-                    disabled={purchasing}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    {purchasing ? "Procesando..." : "Continuar a PayPal"}
                   </Button>
                 </div>
               )}

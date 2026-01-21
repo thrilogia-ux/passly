@@ -29,8 +29,10 @@ export async function POST(request: NextRequest) {
     const data = createPaymentSchema.parse(body);
 
     // Calcular precio
-    const costPerToken = 0.10;
+    const costPerToken = 0.1;
     const totalAmount = data.tokens * costPerToken;
+
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3002";
 
     // Crear preferencia de pago en MercadoPago
     const preference = {
@@ -47,11 +49,12 @@ export async function POST(request: NextRequest) {
         name: session.user.name || "",
       },
       back_urls: {
-        success: `${process.env.NEXTAUTH_URL || "http://localhost:3002"}/dashboard/tokens?payment=success`,
-        failure: `${process.env.NEXTAUTH_URL || "http://localhost:3002"}/dashboard/tokens?payment=failure`,
-        pending: `${process.env.NEXTAUTH_URL || "http://localhost:3002"}/dashboard/tokens?payment=pending`,
+        success: `${baseUrl}/dashboard/tokens?payment=success`,
+        failure: `${baseUrl}/dashboard/tokens?payment=failure`,
+        pending: `${baseUrl}/dashboard/tokens?payment=pending`,
       },
       auto_return: "approved",
+      notification_url: `${baseUrl}/api/payments/mercadopago`,
       metadata: {
         organizationId: session.user.organizationId,
         tokens: data.tokens,
@@ -81,15 +84,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Webhook para recibir notificaciones de MercadoPago
+// Webhook / callback de MercadoPago
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const paymentId = searchParams.get("payment_id");
-    const status = searchParams.get("status");
+    const paymentId = searchParams.get("payment_id") || searchParams.get("id");
+    const statusParam = searchParams.get("status");
 
-    if (!paymentId || !status) {
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+    if (!paymentId) {
+      return NextResponse.json({ error: "Missing payment_id" }, { status: 400 });
     }
 
     // Obtener información del pago
@@ -100,13 +103,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid payment metadata" }, { status: 400 });
     }
 
+    const status = statusParam || payment.body.status;
+
     // Si el pago fue aprobado, agregar tokens
-    if (status === "approved" || payment.body.status === "approved") {
-      const organization = await db.organization.update({
+    if (status === "approved") {
+      const tokensToAdd = parseInt(metadata.tokens, 10);
+
+      await db.organization.update({
         where: { id: metadata.organizationId },
         data: {
           tokenBalance: {
-            increment: parseInt(metadata.tokens),
+            increment: tokensToAdd,
           },
         },
       });
@@ -116,8 +123,8 @@ export async function GET(request: NextRequest) {
         data: {
           organizationId: metadata.organizationId,
           type: "PURCHASE",
-          amount: parseInt(metadata.tokens),
-          description: `Purchase via MercadoPago - ${metadata.tokens} tokens`,
+          amount: tokensToAdd,
+          description: `Purchase via MercadoPago - ${tokensToAdd} tokens`,
           metadata: JSON.stringify({
             paymentId,
             paymentMethod: "mercadopago",
@@ -129,7 +136,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Tokens added" });
     }
 
-    return NextResponse.json({ success: true, message: "Payment processed" });
+    return NextResponse.json({
+      success: true,
+      message: `Payment processed with status: ${status}`,
+    });
   } catch (error) {
     console.error("Error processing MercadoPago webhook:", error);
     return NextResponse.json(
