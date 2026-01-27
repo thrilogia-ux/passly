@@ -7,12 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Coins, History, CreditCard, Building2, X } from "lucide-react";
 import { 
   TOKEN_PACKAGES, 
-  USD_TO_ARS, 
-  PRICE_PER_TOKEN_USD,
-  usdToArs, 
+  PRICE_PER_TOKEN_ARS,
   formatARS,
   getPackagePriceARS,
-  getPackagePriceUSD
+  getPricePerInvitation
 } from "@/lib/pricing";
 
 type PaymentMethod = "mercadopago" | "bank" | null;
@@ -49,7 +47,7 @@ export default function TokensPage() {
       loadBalance();
       window.history.replaceState({}, "", "/dashboard/tokens");
     } else if (paymentStatus === "failure") {
-      alert("El pago fue rechazado. Por favor, intenta nuevamente.");
+      alert("El pago fue rechazado. Por favor, intentá nuevamente.");
       window.history.replaceState({}, "", "/dashboard/tokens");
     } else if (paymentStatus === "pending") {
       alert("El pago está pendiente. Los tokens se agregarán cuando se confirme.");
@@ -90,7 +88,7 @@ export default function TokensPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           tokens: amount, 
-          amount: priceARS // Enviar precio en ARS
+          amount: priceARS
         }),
       });
 
@@ -111,7 +109,7 @@ export default function TokensPage() {
 
   const handleBankTransfer = async () => {
     if (!bankForm.bankName || !bankForm.transactionNumber) {
-      alert("Por favor, completa todos los campos");
+      alert("Por favor, completá todos los campos");
       return;
     }
 
@@ -126,7 +124,7 @@ export default function TokensPage() {
           tokens: amount,
           bankName: bankForm.bankName,
           transactionNumber: bankForm.transactionNumber,
-          amount: priceARS, // Enviar precio en ARS
+          amount: priceARS,
         }),
       });
 
@@ -156,14 +154,13 @@ export default function TokensPage() {
 
   // Calcular precio para cantidad personalizada
   const customPriceARS = getPackagePriceARS(amount);
-  const customPriceUSD = getPackagePriceUSD(amount);
 
   return (
     <div className="w-full max-w-7xl mx-auto">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold">Gestión de Tokens</h1>
         <p className="mt-2 text-sm md:text-base text-gray-600">
-          Compra tokens para enviar invitaciones
+          Comprá tokens para enviar invitaciones
         </p>
       </div>
 
@@ -183,17 +180,10 @@ export default function TokensPage() {
         </CardContent>
       </Card>
 
-      {/* Exchange Rate Info */}
-      <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
-        <p className="text-sm text-blue-800">
-          💱 Cotización: <strong>1 USD = {formatARS(USD_TO_ARS)}</strong> (dólar oficial)
-        </p>
-      </div>
-
       {/* Purchase Packages */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 mb-6">
         {TOKEN_PACKAGES.map((pkg) => {
-          const priceARS = usdToArs(pkg.priceUSD);
+          const pricePerInvitation = getPricePerInvitation(pkg.tokens);
           
           return (
             <Card
@@ -210,8 +200,8 @@ export default function TokensPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">{pkg.tokens} tokens</CardTitle>
                 <div className="mt-2">
-                  <p className="text-2xl font-bold text-gray-900">{formatARS(priceARS)}</p>
-                  <p className="text-xs text-gray-500">(${pkg.priceUSD} USD)</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatARS(pkg.priceARS)}</p>
+                  <p className="text-xs text-gray-500">{formatARS(pricePerInvitation)} por invitación</p>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 pt-2">
@@ -277,7 +267,7 @@ export default function TokensPage() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Precio: <strong>{formatARS(customPriceARS)}</strong> ({formatARS(usdToArs(PRICE_PER_TOKEN_USD))} por token)
+            Precio: <strong>{formatARS(customPriceARS)}</strong> ({formatARS(PRICE_PER_TOKEN_ARS)} por token)
           </p>
         </CardContent>
       </Card>
@@ -308,9 +298,6 @@ export default function TokensPage() {
                 <p className="text-2xl font-bold">{amount}</p>
                 <p className="text-lg font-semibold text-[#ff5040] mt-2">
                   Total: {formatARS(getPackagePriceARS(amount))}
-                </p>
-                <p className="text-xs text-gray-500">
-                  (${getPackagePriceUSD(amount).toFixed(2)} USD)
                 </p>
               </div>
 

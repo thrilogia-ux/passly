@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { TOKEN_PACKAGES, USD_TO_ARS, usdToArs, formatARS } from "@/lib/pricing";
+import { TOKEN_PACKAGES, formatARS, getPricePerInvitation } from "@/lib/pricing";
 
 export function Pricing() {
   return (
@@ -67,16 +67,12 @@ export function Pricing() {
           <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
             Packs de Tokens
           </h3>
-          <p className="text-center text-gray-600 mb-4">
-            Después de las 10 invitaciones gratis, compra tokens según tu necesidad
-          </p>
-          <p className="text-center text-sm text-gray-500 mb-12">
-            Precios en pesos argentinos (cotización: 1 USD = {formatARS(USD_TO_ARS)})
+          <p className="text-center text-gray-600 mb-12">
+            Después de las 10 invitaciones gratis, comprá tokens según tu necesidad
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {TOKEN_PACKAGES.map((pack, index) => {
-              const priceARS = usdToArs(pack.priceUSD);
-              const pricePerInvitation = priceARS / pack.tokens;
+              const pricePerInvitation = getPricePerInvitation(pack.tokens);
               
               return (
                 <Card
@@ -100,14 +96,11 @@ export function Pricing() {
                     </CardTitle>
                     <div className="mt-4">
                       <span className="text-3xl font-bold text-gray-900">
-                        {formatARS(priceARS)}
+                        {formatARS(pack.priceARS)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      (${pack.priceUSD} USD)
-                    </p>
                     <CardDescription className="mt-2">
-                      {formatARS(Math.round(pricePerInvitation))} por invitación
+                      {formatARS(pricePerInvitation)} por invitación
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

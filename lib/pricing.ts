@@ -1,26 +1,19 @@
-// Configuración centralizada de precios
-// Actualizar el tipo de cambio según el dólar oficial
-
-// Tipo de cambio: Dólar oficial (actualizar según corresponda)
-export const USD_TO_ARS = 1100; // $1 USD = $1100 ARS (dólar oficial enero 2026)
+// Configuración centralizada de precios (en pesos argentinos)
 
 // Paquetes de tokens disponibles
 export const TOKEN_PACKAGES = [
-  { tokens: 50, priceUSD: 5, popular: false },
-  { tokens: 100, priceUSD: 9, popular: false },
-  { tokens: 250, priceUSD: 20, popular: true },
-  { tokens: 500, priceUSD: 35, popular: false },
-  { tokens: 1000, priceUSD: 60, popular: false },
+  { tokens: 50, priceARS: 11000, popular: false },
+  { tokens: 100, priceARS: 19800, popular: false },
+  { tokens: 250, priceARS: 44000, popular: true },
+  { tokens: 500, priceARS: 77000, popular: false },
+  { tokens: 1000, priceARS: 132000, popular: false },
 ];
 
 // Precio por token individual (para compras personalizadas)
-export const PRICE_PER_TOKEN_USD = 0.10; // $0.10 USD por token
+// Usamos el precio del paquete de 100 como referencia: $198 por token
+export const PRICE_PER_TOKEN_ARS = 198;
 
-// Funciones de conversión
-export function usdToArs(usd: number): number {
-  return Math.round(usd * USD_TO_ARS);
-}
-
+// Funciones de formato
 export function formatARS(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
@@ -30,31 +23,21 @@ export function formatARS(amount: number): string {
   }).format(amount);
 }
 
-export function formatUSD(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
 // Obtener precio en ARS para un paquete
 export function getPackagePriceARS(tokens: number): number {
   const pkg = TOKEN_PACKAGES.find((p) => p.tokens === tokens);
   if (pkg) {
-    return usdToArs(pkg.priceUSD);
+    return pkg.priceARS;
   }
   // Para compras personalizadas
-  return usdToArs(tokens * PRICE_PER_TOKEN_USD);
+  return tokens * PRICE_PER_TOKEN_ARS;
 }
 
-// Obtener precio en USD para un paquete
-export function getPackagePriceUSD(tokens: number): number {
+// Obtener precio por invitación de un paquete
+export function getPricePerInvitation(tokens: number): number {
   const pkg = TOKEN_PACKAGES.find((p) => p.tokens === tokens);
   if (pkg) {
-    return pkg.priceUSD;
+    return Math.round(pkg.priceARS / pkg.tokens);
   }
-  // Para compras personalizadas
-  return tokens * PRICE_PER_TOKEN_USD;
+  return PRICE_PER_TOKEN_ARS;
 }
