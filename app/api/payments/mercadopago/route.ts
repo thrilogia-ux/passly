@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import { getPackagePriceARS } from "@/lib/pricing";
 
 // Configurar cliente MercadoPago v2
 const getClient = () => {
@@ -14,7 +15,7 @@ const getClient = () => {
 };
 
 const createPaymentSchema = z.object({
-  amount: z.number().int().positive(),
+  amount: z.number().positive(), // Precio en ARS
   tokens: z.number().int().positive(),
   description: z.string().optional(),
 });
@@ -38,9 +39,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createPaymentSchema.parse(body);
 
-    // Calcular precio
-    const costPerToken = 0.1;
-    const totalAmount = data.tokens * costPerToken;
+    // Usar el precio en ARS enviado desde el frontend, o calcularlo
+    const totalAmountARS = data.amount || getPackagePriceARS(data.tokens);
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3002";
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
             id: `tokens-${data.tokens}`,
             title: `${data.tokens} Tokens PASSLY`,
             quantity: 1,
-            unit_price: totalAmount,
+            unit_price: totalAmountARS,
             currency_id: "ARS", // Pesos argentinos para MercadoPago Argentina
           },
         ],

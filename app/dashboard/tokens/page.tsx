@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Coins, ShoppingCart, History, CreditCard, Building2, X, CheckCircle } from "lucide-react";
+import { Coins, History, CreditCard, Building2, X } from "lucide-react";
+import { 
+  TOKEN_PACKAGES, 
+  USD_TO_ARS, 
+  PRICE_PER_TOKEN_USD,
+  usdToArs, 
+  formatARS,
+  getPackagePriceARS,
+  getPackagePriceUSD
+} from "@/lib/pricing";
 
 type PaymentMethod = "mercadopago" | "bank" | null;
 
@@ -30,13 +39,20 @@ export default function TokensPage() {
     // Check for payment success/failure in URL
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("payment");
+    const tokensAdded = params.get("tokens");
+    
     if (paymentStatus === "success") {
-      alert("¡Pago exitoso! Los tokens se agregarán a tu cuenta.");
+      const message = tokensAdded 
+        ? `¡Pago exitoso! Se agregaron ${tokensAdded} tokens a tu cuenta.`
+        : "¡Pago exitoso! Los tokens se agregarán a tu cuenta.";
+      alert(message);
       loadBalance();
-      // Clean URL
       window.history.replaceState({}, "", "/dashboard/tokens");
     } else if (paymentStatus === "failure") {
       alert("El pago fue rechazado. Por favor, intenta nuevamente.");
+      window.history.replaceState({}, "", "/dashboard/tokens");
+    } else if (paymentStatus === "pending") {
+      alert("El pago está pendiente. Los tokens se agregarán cuando se confirme.");
       window.history.replaceState({}, "", "/dashboard/tokens");
     }
   }, []);
@@ -67,17 +83,23 @@ export default function TokensPage() {
   const handleMercadoPago = async () => {
     setPurchasing(true);
     try {
+      const priceARS = getPackagePriceARS(amount);
+      
       const res = await fetch("/api/payments/mercadopago", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tokens: amount, amount: amount * 0.1 }),
+        body: JSON.stringify({ 
+          tokens: amount, 
+          amount: priceARS // Enviar precio en ARS
+        }),
       });
 
+      const data = await res.json();
+      
       if (!res.ok) {
-        throw new Error("Error creating payment");
+        throw new Error(data.details || data.error || "Error creating payment");
       }
 
-      const data = await res.json();
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       }
@@ -95,6 +117,8 @@ export default function TokensPage() {
 
     setPurchasing(true);
     try {
+      const priceARS = getPackagePriceARS(amount);
+      
       const res = await fetch("/api/payments/bank-transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,7 +126,7 @@ export default function TokensPage() {
           tokens: amount,
           bankName: bankForm.bankName,
           transactionNumber: bankForm.transactionNumber,
-          amount: amount * 0.1,
+          amount: priceARS, // Enviar precio en ARS
         }),
       });
 
@@ -113,9 +137,9 @@ export default function TokensPage() {
 
       const data = await res.json();
       alert(
-        `Solicitud de transferencia creada. Número de referencia: ${data.requestId}\n\n` +
-        `Por favor, realiza la transferencia a:\n${data.instructions.bankAccount}\n` +
-        `Monto: $${data.instructions.amount}\n` +
+        `Solicitud de transferencia creada.\n\n` +
+        `Por favor, realizá la transferencia a:\n${data.instructions.bankAccount}\n` +
+        `Monto: ${formatARS(priceARS)}\n` +
         `Referencia: ${data.instructions.reference}\n\n` +
         `Los tokens se agregarán una vez aprobada la transferencia.`
       );
@@ -130,12 +154,9 @@ export default function TokensPage() {
     }
   };
 
-  const packages = [
-    { tokens: 100, price: 10, popular: false },
-    { tokens: 500, price: 45, popular: true },
-    { tokens: 1000, price: 80, popular: false },
-    { tokens: 5000, price: 350, popular: false },
-  ];
+  // Calcular precio para cantidad personalizada
+  const customPriceARS = getPackagePriceARS(amount);
+  const customPriceUSD = getPackagePriceUSD(amount);
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -162,53 +183,69 @@ export default function TokensPage() {
         </CardContent>
       </Card>
 
+      {/* Exchange Rate Info */}
+      <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+        <p className="text-sm text-blue-800">
+          💱 Cotización: <strong>1 USD = {formatARS(USD_TO_ARS)}</strong> (dólar oficial)
+        </p>
+      </div>
+
       {/* Purchase Packages */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        {packages.map((pkg) => (
-          <Card
-            key={pkg.tokens}
-            className={`relative transition-all hover:shadow-lg ${
-              pkg.popular ? "ring-2 ring-[#ff5040] scale-105" : ""
-            }`}
-          >
-            {pkg.popular && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#cdfa55] to-[#b8e644] text-[#303030] px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-                Más Popular
-              </div>
-            )}
-            <CardHeader>
-              <CardTitle className="text-2xl">{pkg.tokens} tokens</CardTitle>
-              <CardDescription>${pkg.price} USD</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                className="w-full"
-                onClick={() => handlePackageSelect(pkg.tokens, "mercadopago")}
-                disabled={purchasing}
-                variant="default"
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                MercadoPago
-              </Button>
-              <Button
-                className="w-full"
-                onClick={() => handlePackageSelect(pkg.tokens, "bank")}
-                disabled={purchasing}
-                variant="secondary"
-              >
-                <Building2 className="w-4 h-4 mr-2" />
-                Transferencia
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 mb-6">
+        {TOKEN_PACKAGES.map((pkg) => {
+          const priceARS = usdToArs(pkg.priceUSD);
+          
+          return (
+            <Card
+              key={pkg.tokens}
+              className={`relative transition-all hover:shadow-lg ${
+                pkg.popular ? "ring-2 ring-[#ff5040] scale-105" : ""
+              }`}
+            >
+              {pkg.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#cdfa55] to-[#b8e644] text-[#303030] px-3 py-1 rounded-full text-xs font-semibold shadow-md whitespace-nowrap">
+                  Más Popular
+                </div>
+              )}
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">{pkg.tokens} tokens</CardTitle>
+                <div className="mt-2">
+                  <p className="text-2xl font-bold text-gray-900">{formatARS(priceARS)}</p>
+                  <p className="text-xs text-gray-500">(${pkg.priceUSD} USD)</p>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-2">
+                <Button
+                  className="w-full"
+                  onClick={() => handlePackageSelect(pkg.tokens, "mercadopago")}
+                  disabled={purchasing}
+                  variant="default"
+                  size="sm"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  MercadoPago
+                </Button>
+                <Button
+                  className="w-full"
+                  onClick={() => handlePackageSelect(pkg.tokens, "bank")}
+                  disabled={purchasing}
+                  variant="secondary"
+                  size="sm"
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  Transferencia
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Custom Amount */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Compra Personalizada</CardTitle>
-          <CardDescription>Ingresa la cantidad de tokens que deseas comprar</CardDescription>
+          <CardDescription>Ingresá la cantidad de tokens que querés comprar</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -240,7 +277,7 @@ export default function TokensPage() {
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Precio: ${(amount * 0.1).toFixed(2)} USD (${(0.1).toFixed(2)} por token)
+            Precio: <strong>{formatARS(customPriceARS)}</strong> ({formatARS(usdToArs(PRICE_PER_TOKEN_USD))} por token)
           </p>
         </CardContent>
       </Card>
@@ -269,8 +306,11 @@ export default function TokensPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Cantidad de tokens</p>
                 <p className="text-2xl font-bold">{amount}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Total: ${(amount * 0.1).toFixed(2)} USD
+                <p className="text-lg font-semibold text-[#ff5040] mt-2">
+                  Total: {formatARS(getPackagePriceARS(amount))}
+                </p>
+                <p className="text-xs text-gray-500">
+                  (${getPackagePriceUSD(amount).toFixed(2)} USD)
                 </p>
               </div>
 
@@ -292,7 +332,7 @@ export default function TokensPage() {
               {selectedPaymentMethod === "bank" && (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
-                    Completa los datos de tu transferencia bancaria. Los tokens se agregarán una vez aprobada la transferencia.
+                    Completá los datos de tu transferencia bancaria. Los tokens se agregarán una vez aprobada la transferencia.
                   </p>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Banco</label>

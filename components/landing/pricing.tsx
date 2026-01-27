@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-const tokenPacks = [
-  { tokens: 50, price: 9.99, popular: false },
-  { tokens: 100, price: 17.99, popular: false },
-  { tokens: 250, price: 39.99, popular: true },
-  { tokens: 500, price: 69.99, popular: false },
-  { tokens: 1000, price: 119.99, popular: false },
-];
+import { TOKEN_PACKAGES, USD_TO_ARS, usdToArs, formatARS } from "@/lib/pricing";
 
 export function Pricing() {
   return (
@@ -71,70 +64,81 @@ export function Pricing() {
 
         {/* Token Packs */}
         <div>
-          <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
+          <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
             Packs de Tokens
           </h3>
-          <p className="text-center text-gray-600 mb-12">
+          <p className="text-center text-gray-600 mb-4">
             Después de las 10 invitaciones gratis, compra tokens según tu necesidad
           </p>
+          <p className="text-center text-sm text-gray-500 mb-12">
+            Precios en pesos argentinos (cotización: 1 USD = {formatARS(USD_TO_ARS)})
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {tokenPacks.map((pack, index) => (
-              <Card
-                key={index}
-                className={`relative border-2 transition-all hover:shadow-xl ${
-                  pack.popular
-                    ? "border-[#ff5040] shadow-lg scale-105"
-                    : "border-gray-200"
-                }`}
-              >
-                {pack.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40] text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      MÁS POPULAR
-                    </span>
-                  </div>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl font-bold">
-                    {pack.tokens} Tokens
-                  </CardTitle>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gray-900">
-                      ${pack.price}
-                    </span>
-                    <span className="text-gray-600 ml-1">USD</span>
-                  </div>
-                  <CardDescription className="mt-2">
-                    ${(pack.price / pack.tokens).toFixed(3)} por invitación
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-center">
-                      <span className="text-[#ff5040] mr-2">✓</span>
-                      {pack.tokens} invitaciones
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-[#ff5040] mr-2">✓</span>
-                      Sin expiración
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-[#ff5040] mr-2">✓</span>
-                      Uso ilimitado
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    variant={pack.popular ? "default" : "outline"}
-                    className="w-full"
-                    disabled
-                  >
-                    Próximamente
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+            {TOKEN_PACKAGES.map((pack, index) => {
+              const priceARS = usdToArs(pack.priceUSD);
+              const pricePerInvitation = priceARS / pack.tokens;
+              
+              return (
+                <Card
+                  key={index}
+                  className={`relative border-2 transition-all hover:shadow-xl ${
+                    pack.popular
+                      ? "border-[#ff5040] shadow-lg scale-105"
+                      : "border-gray-200"
+                  }`}
+                >
+                  {pack.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-gradient-to-r from-[#ff5040] to-[#ff8a40] text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        MÁS POPULAR
+                      </span>
+                    </div>
+                  )}
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl font-bold">
+                      {pack.tokens} Tokens
+                    </CardTitle>
+                    <div className="mt-4">
+                      <span className="text-3xl font-bold text-gray-900">
+                        {formatARS(priceARS)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      (${pack.priceUSD} USD)
+                    </p>
+                    <CardDescription className="mt-2">
+                      {formatARS(Math.round(pricePerInvitation))} por invitación
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm text-gray-700">
+                      <li className="flex items-center">
+                        <span className="text-[#ff5040] mr-2">✓</span>
+                        {pack.tokens} invitaciones
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-[#ff5040] mr-2">✓</span>
+                        Sin expiración
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-[#ff5040] mr-2">✓</span>
+                        Uso ilimitado
+                      </li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Link href="/register" className="w-full">
+                      <Button
+                        variant={pack.popular ? "default" : "outline"}
+                        className="w-full"
+                      >
+                        Comprar
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>
