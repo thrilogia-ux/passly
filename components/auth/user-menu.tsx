@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { 
   User, 
   Settings, 
@@ -23,7 +23,6 @@ interface UserMenuProps {
 export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -42,17 +41,8 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
   }, [isOpen]);
 
   const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/signout", {
-        method: "POST",
-      });
-      if (response.ok) {
-        router.push("/login");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    setIsOpen(false);
+    await signOut({ callbackUrl: "/login" });
   };
 
   return (
@@ -94,11 +84,14 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
           </div>
 
           {/* Menu items */}
-          <div className="py-2">
+          <div className="py-2" onClick={(e) => e.stopPropagation()}>
             <Link
               href="/dashboard/tokens"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-amber-50/50 transition-all duration-200 group/item"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-amber-50/50 transition-all duration-200 group/item cursor-pointer"
             >
               <div className="w-9 h-9 bg-gradient-to-br from-yellow-400 to-amber-400 rounded-xl flex items-center justify-center shadow-sm group-hover/item:scale-110 transition-transform">
                 <Coins className="w-4.5 h-4.5 text-white" />
@@ -111,8 +104,11 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
             
             <Link
               href="/dashboard/reports"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-blue-50/50 transition-all duration-200 group/item"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-blue-50/50 transition-all duration-200 group/item cursor-pointer"
             >
               <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center shadow-sm group-hover/item:scale-110 transition-transform">
                 <BarChart3 className="w-4.5 h-4.5 text-white" />
@@ -125,8 +121,11 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
             
             <Link
               href="/dashboard/settings/integrations"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group/item"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group/item cursor-pointer"
             >
               <div className="w-9 h-9 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-sm group-hover/item:scale-110 transition-transform">
                 <Settings className="w-4.5 h-4.5 text-white" />
@@ -139,8 +138,11 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
             
             <Link
               href="/dashboard/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-purple-50/50 transition-all duration-200 group/item"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="flex items-center space-x-3 px-5 py-3 text-sm text-gray-700 hover:bg-purple-50/50 transition-all duration-200 group/item cursor-pointer"
             >
               <div className="w-9 h-9 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-sm group-hover/item:scale-110 transition-transform">
                 <User className="w-4.5 h-4.5 text-white" />
@@ -153,10 +155,15 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
           </div>
 
           {/* Logout */}
-          <div className="border-t border-gray-100/50 pt-2">
+          <div className="border-t border-gray-100/50 pt-2" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-red-600 hover:bg-red-50/50 transition-all duration-200 group/item"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleLogout();
+              }}
+              className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-red-600 hover:bg-red-50/50 transition-all duration-200 group/item cursor-pointer"
             >
               <div className="w-9 h-9 bg-gradient-to-br from-red-400 to-rose-400 rounded-xl flex items-center justify-center shadow-sm group-hover/item:scale-110 transition-transform">
                 <LogOut className="w-4.5 h-4.5 text-white" />
