@@ -76,7 +76,7 @@ export function UserMenu({ userName, userEmail, userRole, tokenBalance }: UserMe
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-100/50 py-3 z-50 overflow-hidden">
+        <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-100/50 py-3 z-[100] overflow-hidden">
           {/* User info header */}
           <div className="px-5 py-4 bg-gradient-to-br from-amber-50/50 to-orange-50/50 border-b border-gray-100/50">
             <div className="flex items-center space-x-3">
