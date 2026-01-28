@@ -77,11 +77,13 @@ export async function GET(request: NextRequest) {
 
 // POST - Crear usuario
 const createUserSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  name: z.string().min(1),
-  role: z.enum(["CLIENT", "ORGANIZER", "STAFF"]),
-  organizationId: z.string().optional(),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  name: z.string().min(1, "El nombre es obligatorio"),
+  role: z.enum(["CLIENT", "ORGANIZER", "STAFF"], {
+    errorMap: () => ({ message: "Rol inválido" }),
+  }),
+  organizationId: z.string().nullish().transform(val => val || undefined),
 });
 
 export async function POST(request: NextRequest) {
@@ -92,11 +94,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    console.log("Received body:", body); // Debug
+    
     const data = createUserSchema.parse(body);
+    console.log("Parsed data:", data); // Debug
 
     // Verificar si el email ya existe
     const existingUser = await db.user.findUnique({
-      where: { email: data.email },
+      where: { email: data.email.toLowerCase() },
     });
 
     if (existingUser) {
@@ -111,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     const user = await db.user.create({
       data: {
-        email: data.email,
+        email: data.email.toLowerCase(),
         password: hashedPassword,
         name: data.name,
         role: data.role,
@@ -122,18 +127,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log("User created:", user.id); // Debug
+
     return NextResponse.json({
       ...user,
       password: undefined,
     });
   } catch (error: any) {
+    console.error("Error creating user:", error);
     if (error instanceof z.ZodError) {
+      const messages = error.issues.map(i => i.message).join(", ");
       return NextResponse.json(
-        { error: "Datos inválidos", details: error.issues },
+        { error: messages, details: error.issues },
         { status: 400 }
       );
     }
-    console.error("Error creating user:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

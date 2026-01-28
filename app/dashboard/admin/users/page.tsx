@@ -82,6 +82,24 @@ export default function AdminUsersPage() {
   };
 
   const handleSave = async () => {
+    // Validaciones del lado del cliente
+    if (!formData.name.trim()) {
+      alert("El nombre es obligatorio");
+      return;
+    }
+    if (!formData.email.trim()) {
+      alert("El email es obligatorio");
+      return;
+    }
+    if (!editingUser && !formData.password) {
+      alert("La contraseña es obligatoria para nuevos usuarios");
+      return;
+    }
+    if (formData.password && formData.password.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
     setSaving(true);
     try {
       const url = editingUser 
@@ -91,15 +109,22 @@ export default function AdminUsersPage() {
       const method = editingUser ? "PUT" : "POST";
       
       const payload: any = {
-        name: formData.name,
-        email: formData.email,
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
         role: formData.role,
-        organizationId: formData.organizationId || null,
       };
       
+      // Solo incluir organizationId si tiene valor
+      if (formData.organizationId && formData.organizationId.trim()) {
+        payload.organizationId = formData.organizationId;
+      }
+      
+      // Incluir password si es nuevo usuario o si se quiere cambiar
       if (formData.password) {
         payload.password = formData.password;
       }
+
+      console.log("Sending payload:", payload); // Debug
 
       const res = await fetch(url, {
         method,
@@ -110,7 +135,11 @@ export default function AdminUsersPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Error al guardar");
+        console.error("Server error:", data); // Debug
+        const errorMsg = data.details 
+          ? `${data.error}: ${JSON.stringify(data.details)}`
+          : data.error || "Error al guardar";
+        throw new Error(errorMsg);
       }
 
       setShowModal(false);
