@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { generateQRDataUrl } from "@/lib/qr/generate";
 import { generateInvitationWithQR } from "@/lib/invitations/generate";
 import { sendEmail } from "@/lib/email/send";
 
