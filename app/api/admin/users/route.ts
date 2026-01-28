@@ -80,9 +80,7 @@ const createUserSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   name: z.string().min(1, "El nombre es obligatorio"),
-  role: z.enum(["CLIENT", "ORGANIZER", "STAFF"], {
-    errorMap: () => ({ message: "Rol inválido" }),
-  }),
+  role: z.enum(["CLIENT", "ORGANIZER", "STAFF"]),
   organizationId: z.string().nullish().transform(val => val || undefined),
 });
 
