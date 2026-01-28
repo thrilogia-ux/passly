@@ -9,7 +9,8 @@ import {
   Users, 
   Mail, 
   QrCode, 
-  FileText
+  FileText,
+  ShieldCheck
 } from "lucide-react";
 
 export default async function DashboardLayout({
@@ -53,6 +54,9 @@ export default async function DashboardLayout({
     { href: "/dashboard/check-in", label: "Check-in", icon: QrCode },
   ];
 
+  // Solo SUPER_ADMIN ve el panel de administración
+  const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-amber-50/30">
       {/* Header mejorado - Estilo Apple */}
@@ -84,6 +88,15 @@ export default async function DashboardLayout({
                     </Link>
                   );
                 })}
+                {isSuperAdmin && (
+                  <Link
+                    href="/dashboard/admin"
+                    className="flex items-center space-x-2.5 px-4 py-2.5 rounded-2xl text-sm font-medium text-red-600 hover:bg-red-50/80 hover:text-red-700 transition-all duration-300 group/item border border-red-200"
+                  >
+                    <ShieldCheck className="w-4.5 h-4.5 group-hover/item:scale-110 transition-transform" />
+                    <span>Admin</span>
+                  </Link>
+                )}
               </nav>
             </div>
             <div className="flex items-center space-x-4">
