@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Send, Loader2, CheckCircle, XCircle, Filter, CheckSquare, Square } from "lucide-react";
+import { Mail, Send, Loader2, CheckCircle, XCircle, CheckSquare, Square, Eye, TestTube, Smartphone, Monitor } from "lucide-react";
 import Link from "next/link";
 import { InvitationStatus } from "@prisma/client";
 
@@ -15,24 +15,38 @@ export default function SendInvitationsPage() {
   
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [event, setEvent] = useState<any>(null);
   const [guestEvents, setGuestEvents] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [result, setResult] = useState<any>(null);
+  const [testResult, setTestResult] = useState<any>(null);
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<"all" | "no-invitation" | "pending" | "sent" | "not-sent">("not-sent");
+  const [userEmail, setUserEmail] = useState<string>("");
+  
+  // Preview state
+  const [previewHTML, setPreviewHTML] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
 
   useEffect(() => {
     if (!eventId) return;
-    
     loadData();
   }, [eventId]);
+
+  // Cargar preview cuando cambia el template seleccionado
+  useEffect(() => {
+    if (event && !loading) {
+      loadPreview();
+    }
+  }, [selectedTemplateId, event, loading]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      // Cargar datos del evento con guestEvents e invitaciones
+      // Cargar datos del evento
       const eventResponse = await fetch(`/api/events/${eventId}`);
       const eventData = await eventResponse.json();
       
@@ -40,20 +54,20 @@ export default function SendInvitationsPage() {
       const templatesResponse = await fetch(`/api/templates?eventId=${eventId}`);
       const templatesData = await templatesResponse.json();
       
+      // Cargar información del usuario
+      const userResponse = await fetch("/api/auth/session");
+      const userData = await userResponse.json();
+      setUserEmail(userData?.user?.email || "");
+      
       setEvent(eventData);
       setTemplates(Array.isArray(templatesData) ? templatesData : []);
       
-      // Cargar guestEvents con invitaciones desde la API de invitaciones
+      // Cargar guestEvents con invitaciones
       const invitationsResponse = await fetch(`/api/invitations?eventId=${eventId}`);
       const invitationsData = await invitationsResponse.json();
       
-      // Obtener guestEvents del evento
-      const guestEventsResponse = await fetch(`/api/events/${eventId}`);
-      const guestEventsData = await guestEventsResponse.json();
+      const allGuestEvents = eventData.guestEvents || [];
       
-      const allGuestEvents = guestEventsData.guestEvents || [];
-      
-      // Mapear invitaciones a guestEvents
       const guestEventsWithInvitations = allGuestEvents.map((ge: any) => {
         const invitation = Array.isArray(invitationsData) 
           ? invitationsData.find((inv: any) => inv.guestEventId === ge.id)
@@ -76,6 +90,94 @@ export default function SendInvitationsPage() {
       console.error("Error loading data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPreview = async () => {
+    if (!event) return;
+    
+    setPreviewLoading(true);
+    try {
+      // Buscar el template seleccionado o el primero disponible
+      let template = null;
+      if (selectedTemplateId) {
+        template = templates.find((t: any) => t.id === selectedTemplateId);
+      } else if (templates.length > 0) {
+        template = templates[0];
+      }
+
+      // Obtener datos de ejemplo
+      const sampleGuest = guestEvents[0]?.guest;
+      const guestName = sampleGuest?.name || "Invitado de Ejemplo";
+      
+      const response = await fetch("/api/templates/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          htmlContent: template?.htmlContent || null,
+          cssContent: template?.cssContent || null,
+          backgroundImage: template?.backgroundImage || null,
+          qrSize: template?.qrSize || 200,
+          qrPosition: template?.qrPosition ? JSON.parse(template.qrPosition) : null,
+          // Datos del evento real
+          eventData: {
+            guestName: guestName,
+            eventName: event.name,
+            eventDate: new Date(event.date).toLocaleDateString("es-AR", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            eventLocation: event.location || "",
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPreviewHTML(data.previewHTML);
+      }
+    } catch (err) {
+      console.error("Error loading preview:", err);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleSendTest = async () => {
+    setSendingTest(true);
+    setTestResult(null);
+    
+    try {
+      const res = await fetch(`/api/events/${eventId}/send-test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateId: selectedTemplateId || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error al enviar prueba");
+      }
+
+      setTestResult({
+        success: true,
+        message: data.message,
+        sentTo: data.sentTo,
+      });
+    } catch (error: any) {
+      setTestResult({
+        success: false,
+        error: error.message,
+      });
+    } finally {
+      setSendingTest(false);
     }
   };
 
@@ -109,7 +211,7 @@ export default function SendInvitationsPage() {
 
   const handleBulkSend = async () => {
     if (selectedGuests.size === 0) {
-      alert("Por favor selecciona al menos un invitado para enviar");
+      alert("Por favor seleccioná al menos un invitado para enviar");
       return;
     }
 
@@ -126,7 +228,7 @@ export default function SendInvitationsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           templateId: selectedTemplateId || undefined,
-          guestEventIds: Array.from(selectedGuests), // Enviar IDs seleccionados
+          guestEventIds: Array.from(selectedGuests),
         }),
       });
 
@@ -138,7 +240,6 @@ export default function SendInvitationsPage() {
 
       setResult(data);
       
-      // Recargar datos después de enviar
       setTimeout(() => {
         loadData();
       }, 2000);
@@ -147,8 +248,7 @@ export default function SendInvitationsPage() {
       console.error("Error completo:", error);
       setResult({
         success: false,
-        error: error.message || "Error al enviar invitaciones. Revisa la consola del servidor para más detalles.",
-        details: error.stack || error.toString(),
+        error: error.message || "Error al enviar invitaciones.",
       });
     } finally {
       setSending(false);
@@ -188,7 +288,7 @@ export default function SendInvitationsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <Link href={`/dashboard/events/${eventId}`} className="text-sm text-gray-600 hover:text-gray-900">
           ← Volver al Evento
@@ -234,39 +334,155 @@ export default function SendInvitationsPage() {
         </CardContent>
       </Card>
 
-      {/* Configuración */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Configuración</CardTitle>
-          <CardDescription>Selecciona un template para las invitaciones</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium block mb-2">Template de Invitación</label>
-            <select
-              value={selectedTemplateId}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">Template por defecto (auto-seleccionado)</option>
-              {templates.map((template: any) => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Configuración y Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Configuración */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuración</CardTitle>
+            <CardDescription>Seleccioná un template para las invitaciones</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium block mb-2">Template de Invitación</label>
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => setSelectedTemplateId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">Template por defecto</option>
+                {templates.map((template: any) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Enviar Prueba */}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TestTube className="w-5 h-5 text-[#ff5040]" />
+                <h4 className="font-medium">Enviar Prueba</h4>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">
+                Enviá una invitación de prueba a tu email para verificar que todo se ve correctamente antes de enviar a todos los invitados.
+              </p>
+              <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                <p className="text-sm">
+                  <span className="text-gray-500">Se enviará a:</span>{" "}
+                  <strong className="text-[#303030]">{userEmail || "..."}</strong>
+                </p>
+              </div>
+              <Button
+                onClick={handleSendTest}
+                disabled={sendingTest}
+                variant="outline"
+                className="w-full border-[#ff5040] text-[#ff5040] hover:bg-[#ffe4dd]"
+              >
+                {sendingTest ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enviando prueba...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Enviarme una prueba (gratis)
+                  </>
+                )}
+              </Button>
+              
+              {/* Resultado del test */}
+              {testResult && (
+                <div className={`mt-3 p-3 rounded-lg ${testResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                  {testResult.success ? (
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="text-sm">{testResult.message}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-red-700">
+                      <XCircle className="w-4 h-4" />
+                      <span className="text-sm">{testResult.error}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Preview */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5" />
+                  Preview
+                </CardTitle>
+                <CardDescription>
+                  Vista previa de la invitación
+                </CardDescription>
+              </div>
+              <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setPreviewDevice("desktop")}
+                  className={`p-2 rounded ${previewDevice === "desktop" ? "bg-white shadow" : ""}`}
+                  title="Desktop"
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setPreviewDevice("mobile")}
+                  className={`p-2 rounded ${previewDevice === "mobile" ? "bg-white shadow" : ""}`}
+                  title="Mobile"
+                >
+                  <Smartphone className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {previewLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              </div>
+            ) : previewHTML ? (
+              <div className={`border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100 mx-auto ${
+                previewDevice === "mobile" ? "max-w-[375px]" : "w-full"
+              }`}>
+                <div className="bg-white overflow-auto" style={{ maxHeight: "400px" }}>
+                  <iframe
+                    srcDoc={previewHTML}
+                    className="w-full border-0"
+                    title="Invitation Preview"
+                    style={{ 
+                      minHeight: "350px",
+                      height: previewDevice === "mobile" ? "500px" : "400px",
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="py-16 text-center text-gray-400">
+                <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-sm">No hay preview disponible</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Filtros y Selección */}
       <Card className="mb-6">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <CardTitle>Seleccionar Invitados</CardTitle>
               <CardDescription>
-                Selecciona manualmente los invitados a los que quieres enviar invitaciones
+                Seleccioná los invitados a los que querés enviar
               </CardDescription>
             </div>
             <div className="flex gap-2">
