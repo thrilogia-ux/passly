@@ -196,8 +196,8 @@ export default async function InvitationsPage({
                       {invitation.status === "PENDING" && (
                         <SendInvitationButton invitationId={invitation.id} />
                       )}
-                      <Link href={`/dashboard/invitations/${invitation.id}`}>
-                        <Button variant="outline" size="sm">Ver</Button>
+                      <Link href={`/dashboard/guests/${invitation.guestEvent.guest.id}`}>
+                        <Button variant="outline" size="sm">Ver Invitado</Button>
                       </Link>
                     </div>
                   </div>
