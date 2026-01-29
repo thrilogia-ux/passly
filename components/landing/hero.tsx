@@ -147,7 +147,7 @@ export function Hero() {
               </Button>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-gray-500">
+          <p className="mt-6 text-lg sm:text-xl font-medium text-white drop-shadow-md">
             ✨ 10 invitaciones gratis para empezar
           </p>
         </div>
