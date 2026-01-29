@@ -54,18 +54,42 @@ export function Hero() {
   }, [isTransitioning]);
 
   const showVideo = HERO_VIDEOS.length > 0 && !videoError;
+  const [showPlayOverlay, setShowPlayOverlay] = useState(true);
 
-  // Forzar play en móvil (iOS/Safari suelen ignorar autoPlay sin interacción)
+  const tryPlayActive = () => {
+    const activeRef = activeSlot === 0 ? ref0 : ref1;
+    const el = activeRef.current;
+    if (!el) return;
+    el.setAttribute("muted", "true");
+    el.setAttribute("playsinline", "true");
+    (el as HTMLVideoElement & { webkitPlaysInline?: boolean }).webkitPlaysInline = true;
+    el.muted = true;
+    el.playsInline = true;
+    el.play().then(() => setShowPlayOverlay(false)).catch(() => {});
+  };
+
+  // Reintentos de play en móvil (iOS a veces no hace autoplay hasta que el elemento está listo)
+  useEffect(() => {
+    if (!showVideo) return;
+    const delays = [0, 150, 400, 800, 1500];
+    const timers = delays.map((ms) =>
+      setTimeout(() => {
+        tryPlayActive();
+      }, ms)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [showVideo, activeSlot, isTransitioning]);
+
+  // Si el video está reproduciendo, ocultar overlay
   useEffect(() => {
     if (!showVideo) return;
     const activeRef = activeSlot === 0 ? ref0 : ref1;
     const el = activeRef.current;
     if (!el) return;
-    el.muted = true;
-    el.playsInline = true;
-    const p = el.play();
-    if (p?.catch) p.catch(() => {});
-  }, [showVideo, activeSlot, isTransitioning]);
+    const onPlaying = () => setShowPlayOverlay(false);
+    el.addEventListener("playing", onPlaying);
+    return () => el.removeEventListener("playing", onPlaying);
+  }, [showVideo, activeSlot]);
 
   const src0 = activeSlot === 0 ? HERO_VIDEOS[currentIndex] : HERO_VIDEOS[nextIndex];
   const src1 = activeSlot === 0 ? HERO_VIDEOS[nextIndex] : HERO_VIDEOS[currentIndex];
@@ -93,7 +117,7 @@ export function Hero() {
             onLoadedData={() => { ref0.current?.play().catch(() => {}); }}
             onEnded={activeSlot === 0 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
-            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
+            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-panel]:hidden"
             style={{ opacity: opacity0 }}
             aria-hidden
           />
@@ -107,10 +131,23 @@ export function Hero() {
             onLoadedData={() => { ref1.current?.play().catch(() => {}); }}
             onEnded={activeSlot === 1 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
-            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
+            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-panel]:hidden"
             style={{ opacity: opacity1 }}
             aria-hidden
           />
+          {/* Overlay "Tocá para reproducir" cuando el móvil bloquea autoplay */}
+          {showPlayOverlay && (
+            <button
+              type="button"
+              onClick={tryPlayActive}
+              className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 md:pointer-events-none md:opacity-0"
+              aria-label="Reproducir video"
+            >
+              <span className="rounded-full bg-white/95 px-5 py-3 text-sm font-medium text-gray-800 shadow-lg backdrop-blur sm:hidden">
+                ▶ Tocá para reproducir
+              </span>
+            </button>
+          )}
           {/* Filtro naranja sobre todo el hero */}
           <div
             className="absolute inset-0 bg-[#ff5040]/30 pointer-events-none"
