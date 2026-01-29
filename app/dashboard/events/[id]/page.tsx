@@ -47,8 +47,12 @@ export default async function EventDetailPage({
       );
     }
 
-    // Check permissions
-    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId !== event.organizationId) {
+    // Check permissions: SUPER_ADMIN, same org, or organizer of this event (when user has no org)
+    const canAccess =
+      session.user.role === "SUPER_ADMIN" ||
+      event.organizationId === session.user.organizationId ||
+      event.organizerId === session.user.id;
+    if (!canAccess) {
       redirect("/dashboard/events");
     }
 

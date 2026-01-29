@@ -18,8 +18,13 @@ export default async function EventsPage() {
     let events: any[] = [];
     try {
       const where: any = {};
-      if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId) {
+      if (session.user.role === "SUPER_ADMIN") {
+        // Sin filtro: ve todos los eventos
+      } else if (session.user.organizationId) {
         where.organizationId = session.user.organizationId;
+      } else {
+        // Usuario sin organización: solo eventos que él organizó
+        where.organizerId = session.user.id;
       }
 
       events = await db.event.findMany({

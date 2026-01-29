@@ -10,14 +10,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Solo eventos activos
+    const eventWhere: any = { status: EventStatus.ACTIVE };
+    if (session.user.role === "SUPER_ADMIN") {
+      // Sin filtro
+    } else if (session.user.organizationId) {
+      eventWhere.organizationId = session.user.organizationId;
+    } else {
+      eventWhere.organizerId = session.user.id;
+    }
+
     const activeEvents = await db.event.findMany({
-      where: {
-        status: EventStatus.ACTIVE,
-        ...(session.user.role !== "SUPER_ADMIN" && session.user.organizationId
-          ? { organizationId: session.user.organizationId }
-          : {}),
-      },
+      where: eventWhere,
       include: {
         guestEvents: {
           include: {

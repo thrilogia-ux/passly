@@ -45,8 +45,12 @@ export default async function DashboardPage() {
       status: EventStatus.ACTIVE,
     };
 
-    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId) {
+    if (session.user.role === "SUPER_ADMIN") {
+      // Sin filtro
+    } else if (session.user.organizationId) {
       whereClause.organizationId = session.user.organizationId;
+    } else {
+      whereClause.organizerId = session.user.id;
     }
 
     activeEvents = await db.event.findMany({

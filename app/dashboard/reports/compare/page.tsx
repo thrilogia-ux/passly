@@ -17,8 +17,12 @@ export default async function CompareReportsPage() {
 
     try {
       const where: any = {};
-      if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId) {
+      if (session.user.role === "SUPER_ADMIN") {
+        // Sin filtro
+      } else if (session.user.organizationId) {
         where.organizationId = session.user.organizationId;
+      } else {
+        where.organizerId = session.user.id;
       }
 
       events = await db.event.findMany({

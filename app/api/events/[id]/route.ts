@@ -56,8 +56,12 @@ export async function GET(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check permissions
-    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId !== event.organizationId) {
+    // Check permissions: SUPER_ADMIN, same org, or organizer of this event
+    const canAccess =
+      session.user.role === "SUPER_ADMIN" ||
+      event.organizationId === session.user.organizationId ||
+      event.organizerId === session.user.id;
+    if (!canAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -90,8 +94,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check permissions
-    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId !== event.organizationId) {
+    // Check permissions: SUPER_ADMIN, same org, or organizer of this event
+    const canAccess =
+      session.user.role === "SUPER_ADMIN" ||
+      event.organizationId === session.user.organizationId ||
+      event.organizerId === session.user.id;
+    if (!canAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -164,8 +172,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Check permissions
-    if (session.user.role !== "SUPER_ADMIN" && session.user.organizationId !== event.organizationId) {
+    // Check permissions: SUPER_ADMIN, same org, or organizer of this event
+    const canAccess =
+      session.user.role === "SUPER_ADMIN" ||
+      event.organizationId === session.user.organizationId ||
+      event.organizerId === session.user.id;
+    if (!canAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

@@ -39,12 +39,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter by user role
-    if (session.user.role !== "SUPER_ADMIN") {
-      if (session.user.organizationId) {
-        where.organizationId = session.user.organizationId;
-      } else {
-        return NextResponse.json({ error: "No organization assigned" }, { status: 403 });
-      }
+    if (session.user.role === "SUPER_ADMIN") {
+      // Sin filtro
+    } else if (session.user.organizationId) {
+      where.organizationId = session.user.organizationId;
+    } else {
+      // Usuario sin organización: solo eventos que él organizó
+      where.organizerId = session.user.id;
     }
 
     const events = await db.event.findMany({
