@@ -102,12 +102,12 @@ export function Hero() {
             className="absolute inset-0 bg-gradient-to-br from-[#ff5040]/15 via-[#ff8a40]/10 to-[#ff5040]/12 mix-blend-overlay"
             aria-hidden
           />
-          {/* Trama pixel / grid sutil */}
+          {/* Trama granos / pixel más visible */}
           <div
-            className="absolute inset-0 opacity-[0.14] mix-blend-soft-light pointer-events-none"
+            className="absolute inset-0 opacity-[0.28] mix-blend-soft-light pointer-events-none"
             style={{
-              backgroundImage: `radial-gradient(circle at center, rgba(0,0,0,0.4) 1px, transparent 1px)`,
-              backgroundSize: "18px 18px",
+              backgroundImage: `radial-gradient(circle at center, rgba(0,0,0,0.65) 1px, transparent 1px)`,
+              backgroundSize: "16px 16px",
             }}
             aria-hidden
           />
@@ -127,7 +127,7 @@ export function Hero() {
               Smart access para eventos modernos
             </span>
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl sm:text-2xl text-white max-w-3xl mx-auto mb-8 drop-shadow-md">
             Diseña invitaciones personalizadas, gestiona eventos y realiza check-in con QR.
             Todo en una plataforma simple y poderosa.
           </p>
