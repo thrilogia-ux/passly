@@ -2,33 +2,51 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-// Video de fondo del hero: deja vacío para usar solo el gradiente.
-// URL con CORS habilitado para que funcione en Vercel. Para video propio: poné hero-bg.mp4 en public/ y usá "/hero-bg.mp4"
-const HERO_VIDEO_URL = "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-const HERO_VIDEO_POSTER = ""; // opcional: imagen mientras carga el video (ej. "/hero-poster.jpg")
+// Videos de fondo del hero (en public/). Al entrar se elige uno al azar; al terminar pasa a otro al azar.
+const HERO_VIDEOS = [
+  "/hero-video-1.mp4.mp4",
+  "/hero-video-2.mp4.mp4",
+  "/hero-video-3.mp4.mp4",
+];
+
+function pickRandomIndex(currentIndex: number): number {
+  if (HERO_VIDEOS.length <= 1) return 0;
+  const others = HERO_VIDEOS.map((_, i) => i).filter((i) => i !== currentIndex);
+  return others[Math.floor(Math.random() * others.length)];
+}
 
 export function Hero() {
   const [videoError, setVideoError] = useState(false);
-  const showVideo = HERO_VIDEO_URL && !videoError;
+  const [currentIndex, setCurrentIndex] = useState<number>(() =>
+    Math.floor(Math.random() * HERO_VIDEOS.length)
+  );
+
+  const currentSrc = useMemo(() => HERO_VIDEOS[currentIndex], [currentIndex]);
+
+  const handleEnded = () => {
+    setCurrentIndex((prev) => pickRandomIndex(prev));
+  };
+
+  const showVideo = HERO_VIDEOS.length > 0 && !videoError;
 
   return (
     <section className="relative min-h-[32rem] overflow-hidden bg-gradient-to-br from-[#fff1ec] via-white to-[#ffe4dd]">
-      {/* Capa de video (solo si hay URL y no falló) */}
+      {/* Capa de video: uno al azar al cargar, al terminar pasa a otro al azar */}
       {showVideo && (
         <>
           <video
+            key={currentSrc}
             autoPlay
             muted
-            loop
             playsInline
-            poster={HERO_VIDEO_POSTER || undefined}
+            onEnded={handleEnded}
             onError={() => setVideoError(true)}
             className="absolute inset-0 h-full w-full object-cover"
             aria-hidden
           >
-            <source src={HERO_VIDEO_URL} type="video/mp4" />
+            <source src={currentSrc} type="video/mp4" />
           </video>
           {/* Overlay para que el texto sea legible */}
           <div
