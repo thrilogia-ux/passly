@@ -55,6 +55,18 @@ export function Hero() {
 
   const showVideo = HERO_VIDEOS.length > 0 && !videoError;
 
+  // Forzar play en móvil (iOS/Safari suelen ignorar autoPlay sin interacción)
+  useEffect(() => {
+    if (!showVideo) return;
+    const activeRef = activeSlot === 0 ? ref0 : ref1;
+    const el = activeRef.current;
+    if (!el) return;
+    el.muted = true;
+    el.playsInline = true;
+    const p = el.play();
+    if (p?.catch) p.catch(() => {});
+  }, [showVideo, activeSlot, isTransitioning]);
+
   const src0 = activeSlot === 0 ? HERO_VIDEOS[currentIndex] : HERO_VIDEOS[nextIndex];
   const src1 = activeSlot === 0 ? HERO_VIDEOS[nextIndex] : HERO_VIDEOS[currentIndex];
   const opacity0 =
@@ -74,10 +86,11 @@ export function Hero() {
           <video
             ref={ref0}
             src={src0}
-            autoPlay={activeSlot === 0}
+            autoPlay
             muted
             playsInline
             preload="auto"
+            onLoadedData={() => { ref0.current?.play().catch(() => {}); }}
             onEnded={activeSlot === 0 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
             className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
@@ -91,6 +104,7 @@ export function Hero() {
             muted
             playsInline
             preload="auto"
+            onLoadedData={() => { ref1.current?.play().catch(() => {}); }}
             onEnded={activeSlot === 1 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
             className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
