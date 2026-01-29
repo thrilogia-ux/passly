@@ -106,12 +106,12 @@ export function Hero() {
             className="absolute inset-0 bg-gradient-to-br from-[#ff5040]/20 via-[#ff8a40]/15 to-[#ff5040]/25 mix-blend-overlay pointer-events-none"
             aria-hidden
           />
-          {/* Trama granos muy visible */}
+          {/* Grano fino tipo película (sutil y agradable) */}
           <div
-            className="absolute inset-0 opacity-[0.5] pointer-events-none"
+            className="absolute inset-0 opacity-[0.22] mix-blend-soft-light pointer-events-none"
             style={{
-              backgroundImage: `radial-gradient(circle at center, rgba(0,0,0,0.85) 1.5px, transparent 1.5px)`,
-              backgroundSize: "12px 12px",
+              backgroundImage: `radial-gradient(circle at 50% 50%, rgba(128,128,128,0.5) 0.5px, transparent 0.5px)`,
+              backgroundSize: "4px 4px",
             }}
             aria-hidden
           />
