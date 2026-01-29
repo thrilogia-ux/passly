@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 
-// Videos de fondo del hero (en public/). Al entrar uno al azar; al terminar crossfade al siguiente.
+// Videos de fondo del hero (en public/). ?v=5 fuerza recarga al cambiar archivos.
 const HERO_VIDEOS = [
-  "/hero-video-1.mp4.mp4",
-  "/hero-video-2.mp4.mp4",
-  "/hero-video-3.mp4.mp4",
+  "/hero-video-1.mp4.mp4?v=5",
+  "/hero-video-2.mp4.mp4?v=5",
+  "/hero-video-3.mp4.mp4?v=5",
 ];
 
 const CROSSFADE_MS = 500;
@@ -97,23 +97,27 @@ export function Hero() {
             style={{ opacity: opacity1 }}
             aria-hidden
           />
-          {/* Tinte naranja de marca (suave) */}
+          {/* Filtro naranja sobre todo el hero */}
           <div
-            className="absolute inset-0 bg-gradient-to-br from-[#ff5040]/15 via-[#ff8a40]/10 to-[#ff5040]/12 mix-blend-overlay"
+            className="absolute inset-0 bg-[#ff5040]/30 pointer-events-none"
             aria-hidden
           />
-          {/* Trama granos / pixel más visible */}
           <div
-            className="absolute inset-0 opacity-[0.28] mix-blend-soft-light pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-br from-[#ff5040]/20 via-[#ff8a40]/15 to-[#ff5040]/25 mix-blend-overlay pointer-events-none"
+            aria-hidden
+          />
+          {/* Trama granos muy visible */}
+          <div
+            className="absolute inset-0 opacity-[0.5] pointer-events-none"
             style={{
-              backgroundImage: `radial-gradient(circle at center, rgba(0,0,0,0.65) 1px, transparent 1px)`,
-              backgroundSize: "16px 16px",
+              backgroundImage: `radial-gradient(circle at center, rgba(0,0,0,0.85) 1.5px, transparent 1.5px)`,
+              backgroundSize: "12px 12px",
             }}
             aria-hidden
           />
-          {/* Overlay liviano para legibilidad del texto */}
+          {/* Overlay para legibilidad del texto (sobre naranja y granos) */}
           <div
-            className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/45 to-[#fff1ec]/60"
+            className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/25 to-[#fff1ec]/50 pointer-events-none"
             aria-hidden
           />
         </>
