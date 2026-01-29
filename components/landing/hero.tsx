@@ -80,7 +80,7 @@ export function Hero() {
             preload="auto"
             onEnded={activeSlot === 0 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
-            className="absolute inset-0 h-full w-full object-cover contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
+            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
             style={{ opacity: opacity0 }}
             aria-hidden
           />
@@ -93,7 +93,7 @@ export function Hero() {
             preload="auto"
             onEnded={activeSlot === 1 ? handleEnded : undefined}
             onError={() => setVideoError(true)}
-            className="absolute inset-0 h-full w-full object-cover contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
+            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.03] saturate-[0.98] transition-opacity duration-500 ease-in-out"
             style={{ opacity: opacity1 }}
             aria-hidden
           />
