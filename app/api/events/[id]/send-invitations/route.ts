@@ -7,6 +7,16 @@ import { InvitationStatus } from "@prisma/client";
 
 // Force Node.js runtime to ensure Prisma client works correctly
 export const runtime = "nodejs";
+// Extender timeout para envíos masivos (Vercel Pro: 60s default, hasta 300s en plan Business)
+export const maxDuration = 60;
+
+// Límites para evitar rate limits de Gmail (~500/día) y timeouts
+const BATCH_SIZE = 25;
+const PAUSE_BETWEEN_BATCHES_MS = 2000;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export async function POST(
   request: NextRequest,
@@ -152,15 +162,24 @@ export async function POST(
       },
     });
 
-    // Enviar todas las invitaciones pendientes
-    for (const invitation of allPendingInvitations) {
-      try {
-        // Importar funciones necesarias
-        const { generateQRToken } = await import("@/lib/qr/generate");
-        const { generateInvitationWithQR } = await import("@/lib/invitations/generate");
-        const { sendEmail } = await import("@/lib/email/send");
+    // Enviar invitaciones en lotes para evitar rate limits (Gmail ~500/día) y timeouts
+    // Para volúmenes muy grandes (200+), considerar una cola de jobs (Inngest, Trigger.dev, etc.)
+    for (let batchStart = 0; batchStart < allPendingInvitations.length; batchStart += BATCH_SIZE) {
+      const batch = allPendingInvitations.slice(batchStart, batchStart + BATCH_SIZE);
+      const batchNum = Math.floor(batchStart / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(allPendingInvitations.length / BATCH_SIZE);
+      if (totalBatches > 1) {
+        console.log(`📧 [BATCH] Procesando lote ${batchNum}/${totalBatches} (${batch.length} invitaciones)`);
+      }
 
-        // Obtener guestEvent con qrCode
+      for (const invitation of batch) {
+        try {
+          // Importar funciones necesarias
+          const { generateQRToken } = await import("@/lib/qr/generate");
+          const { generateInvitationWithQR } = await import("@/lib/invitations/generate");
+          const { sendEmail } = await import("@/lib/email/send");
+
+          // Obtener guestEvent con qrCode
         const guestEventWithQR = await db.guestEvent.findUnique({
           where: { id: invitation.guestEventId },
           include: {
@@ -278,6 +297,13 @@ export async function POST(
           guestName: invitation.guestEvent?.guest?.name || "Unknown",
           error: error.message || "Error sending invitation",
         });
+      }
+    }
+
+      // Pausa entre lotes para evitar rate limits
+      if (batchStart + BATCH_SIZE < allPendingInvitations.length) {
+        console.log(`📧 [BATCH] Pausa de ${PAUSE_BETWEEN_BATCHES_MS}ms antes del siguiente lote...`);
+        await sleep(PAUSE_BETWEEN_BATCHES_MS);
       }
     }
 

@@ -91,15 +91,14 @@ export async function generateInvitationWithQR(
       );
     } catch (error: any) {
       console.error("Error combining images:", error);
-      // Si falla, usar imagen de fondo sola y QR separado como fallback
+      // Si falla, usar imagen de fondo en base64 (evitar URLs externas: Gmail/spam bloquean)
       try {
-        const backgroundImageUrl = await imageToBase64(template.backgroundImage);
-        combinedImageUrl = backgroundImageUrl;
+        combinedImageUrl = await imageToBase64(template.backgroundImage);
       } catch (fallbackError: any) {
-        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3002";
-        combinedImageUrl = template.backgroundImage.startsWith("/") 
-          ? `${baseUrl}${template.backgroundImage}`
-          : template.backgroundImage;
+        console.error("Fallback imageToBase64 failed:", fallbackError);
+        // Nunca usar URLs externas en emails: clientes bloquean imágenes remotas
+        // Usar placeholder base64 1x1 transparente para no romper el layout
+        combinedImageUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
       }
     }
     
