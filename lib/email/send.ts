@@ -68,9 +68,22 @@ export async function sendEmail(options: SendEmailOptions) {
                        process.env.NEXT_PUBLIC_RESEND_API_KEY;
   const cleanKey = resendApiKey ? resendApiKey.replace(/^["']|["']$/g, '').trim() : "";
   
+  const useSmtpFirst = process.env.EMAIL_USE_SMTP_FIRST === "true" || process.env.EMAIL_USE_SMTP_FIRST === "1";
   console.log("🔍 [EMAIL] RESEND_API_KEY existe:", !!resendApiKey);
-  console.log("🔍 [EMAIL] RESEND_API_KEY length:", cleanKey.length);
+  console.log("🔍 [EMAIL] EMAIL_USE_SMTP_FIRST:", useSmtpFirst);
   console.log("🔍 [EMAIL] EMAIL_FROM:", process.env.EMAIL_FROM || "No configurado (usará default)");
+  
+  // Si EMAIL_USE_SMTP_FIRST=true: usar Gmail primero (Resend sin dominio verificado puede no entregar)
+  if (useSmtpFirst && sendEmailSMTP && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+    console.log("📧 [EMAIL] Usando Gmail SMTP primero...");
+    try {
+      const result = await sendEmailSMTP(options);
+      if (result.success) return result;
+      console.warn("⚠️  [EMAIL] SMTP falló, intentando Resend...");
+    } catch (e: any) {
+      console.warn("⚠️  [EMAIL] SMTP falló:", e?.message, "- intentando Resend...");
+    }
+  }
   
   // Si no hay API key válida, intentar SMTP como alternativa
   if (!cleanKey || cleanKey === "" || cleanKey.length < 10) {
