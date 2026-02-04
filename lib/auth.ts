@@ -83,10 +83,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token) {
+      if (session.user && token?.id) {
+        // Fetch fresh user data from DB to avoid stale organizationId/role across devices
+        try {
+          const db = await import("./db").then((m) => m.db);
+          const user = await db.user.findUnique({
+            where: { id: token.id as string },
+            select: { id: true, role: true, organizationId: true, name: true, email: true },
+          });
+          if (user) {
+            session.user.id = user.id;
+            session.user.role = user.role as UserRole;
+            session.user.organizationId = user.organizationId ?? null;
+            session.user.name = user.name ?? session.user.name;
+            session.user.email = user.email ?? session.user.email;
+            return session;
+          }
+        } catch (error) {
+          console.error("Session refresh error, using token data:", error);
+        }
+        // Fallback to token data if DB fetch fails
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
-        session.user.organizationId = token.organizationId as string | null;
+        session.user.organizationId = (token.organizationId as string | null) ?? null;
       }
       return session;
     },

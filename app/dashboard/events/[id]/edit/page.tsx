@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EventStatus } from "@prisma/client";
+import { LocationPicker } from "@/components/events/location-picker";
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -161,10 +162,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <label htmlFor="location" className="text-sm font-medium">
                 Ubicación
               </label>
-              <Input
-                id="location"
+              <LocationPicker
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                onChange={(location) => setFormData({ ...formData, location })}
+                placeholder="Buscar dirección en Google Maps..."
               />
             </div>
 

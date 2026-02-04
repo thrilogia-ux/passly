@@ -33,6 +33,10 @@ API_KEY="test-api-key"
 RESEND_API_KEY=""
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
+
+# Ubicación en eventos: usa OpenStreetMap por defecto (gratis, sin config).
+# Opcional: si tenés API de Google Maps, habilita Places/Embed APIs y agrega:
+# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
 ```
 
 **Para generar secrets aleatorios:**

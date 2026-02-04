@@ -157,6 +157,9 @@ EMAIL_FROM=PASSLY <noreply@tu-dominio.com>
 GOOGLE_CLIENT_ID=tu_google_client_id
 GOOGLE_CLIENT_SECRET=tu_google_client_secret
 
+# Ubicación en eventos: usa OpenStreetMap por defecto (gratis). Google Maps es opcional.
+# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
+
 # API Pública
 API_KEY=tu_api_key_para_api_publica
 ```
