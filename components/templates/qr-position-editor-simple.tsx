@@ -35,6 +35,7 @@ export function QRPositionEditorSimple({
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [verticalPercent, setVerticalPercent] = useState(80); // Por defecto 80% desde arriba
   const imageRef = useRef<HTMLImageElement>(null);
+  const hasSyncedFromInitial = useRef(false);
 
   useEffect(() => {
     if (imageRef.current) {
@@ -53,20 +54,24 @@ export function QRPositionEditorSimple({
     }
   }, [backgroundImage]);
 
-  // Si hay initialPosition, calcular el porcentaje vertical inicial
+  // Reset sync flag cuando cambia la imagen (nuevo template)
   useEffect(() => {
-    if (initialPosition?.y !== undefined && imageSize.height > 0 && imageSize.width > 0) {
+    hasSyncedFromInitial.current = false;
+  }, [backgroundImage]);
+
+  // Sincronizar verticalPercent desde initialPosition SOLO al cargar (evitar bucle con onPositionChange)
+  useEffect(() => {
+    if (hasSyncedFromInitial.current || imageSize.height <= 0 || imageSize.width <= 0) return;
+    if (initialPosition?.y !== undefined) {
       const qrHeight = initialPosition.height || position.height;
-      // Calcular el centro del QR en Y
       const centerY = initialPosition.y + (qrHeight / 2);
-      // Convertir a porcentaje (0-100)
       const percent = (centerY / imageSize.height) * 100;
       setVerticalPercent(Math.max(0, Math.min(100, percent)));
-    } else if (imageSize.height > 0 && imageSize.width > 0 && !initialPosition) {
-      // Si no hay posición inicial y ya tenemos el tamaño de la imagen, usar 80% por defecto
+    } else {
       setVerticalPercent(80);
     }
-  }, [imageSize.height, imageSize.width, initialPosition]);
+    hasSyncedFromInitial.current = true;
+  }, [imageSize.width, imageSize.height, initialPosition?.y, initialPosition?.height, position.height]);
 
   // Calcular posición: X siempre centrado, Y según el porcentaje vertical
   useEffect(() => {
