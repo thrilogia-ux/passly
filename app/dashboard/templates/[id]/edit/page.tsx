@@ -5,20 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { QRPositionEditorV2 } from "@/components/templates/qr-position-editor-v2";
+import { QRPositionEditorSimple } from "@/components/templates/qr-position-editor-simple";
 import { Upload, Image as ImageIcon, Code, Save, Loader2 } from "lucide-react";
-
-type QRPosition = 
-  | "top-left" 
-  | "top-center" 
-  | "top-right"
-  | "center-left" 
-  | "center" 
-  | "center-right"
-  | "bottom-left" 
-  | "bottom-center" 
-  | "bottom-right"
-  | "custom";
 
 export default function EditTemplatePage({
   params,
@@ -40,7 +28,6 @@ export default function EditTemplatePage({
     htmlContent: "",
     cssContent: "",
     qrPosition: null as { 
-      zone?: QRPosition;
       x?: number; 
       y?: number; 
       width?: number; 
@@ -281,18 +268,20 @@ export default function EditTemplatePage({
                     </div>
                   </div>
                   
-                  {/* Editor de posición del QR */}
+                  {/* Editor de posición del QR: centrado + barra vertical + tamaño */}
                   <div className="border-t pt-4">
                     <h3 className="text-sm font-medium mb-2">Posición del QR</h3>
-                    <QRPositionEditorV2
+                    <QRPositionEditorSimple
                       backgroundImage={formData.backgroundImage}
                       onPositionChange={(pos) => setFormData({ 
                         ...formData, 
-                        qrPosition: formData.qrPosition 
-                          ? { ...formData.qrPosition, ...pos } 
-                          : pos 
+                        qrPosition: pos 
                       })}
-                      initialPosition={formData.qrPosition || undefined}
+                      initialPosition={formData.qrPosition ? {
+                        y: formData.qrPosition.y,
+                        width: formData.qrPosition.width,
+                        height: formData.qrPosition.height,
+                      } : undefined}
                       qrSize={formData.qrSize}
                     />
                   </div>

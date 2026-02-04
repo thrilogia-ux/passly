@@ -118,7 +118,7 @@ export default function SendInvitationsPage() {
           cssContent: template?.cssContent || null,
           backgroundImage: template?.backgroundImage || null,
           qrSize: template?.qrSize || 200,
-          qrPosition: template?.qrPosition ? JSON.parse(template.qrPosition) : null,
+          qrPosition: template?.qrPosition ?? null,
           // Datos del evento real
           eventData: {
             guestName: guestName,
