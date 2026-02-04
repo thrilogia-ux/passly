@@ -100,11 +100,17 @@ export async function POST(
     const testQrToken = `TEST-${Date.now()}`;
     const testConfirmationToken = `test-confirmation-${Date.now()}`;
 
-    // Generar HTML de invitación
-    let htmlContent = "";
-    
+    // Generar HTML de invitación (con adjuntos CID)
+    const invitationData = {
+      name: guestName,
+      eventName: event.name,
+      eventDate: eventDate,
+      eventLocation: event.location || "",
+    };
+
+    let invitationResult;
     if (template) {
-      htmlContent = await generateInvitationWithQR({
+      invitationResult = await generateInvitationWithQR({
         template: {
           backgroundImage: template.backgroundImage,
           htmlContent: template.htmlContent,
@@ -116,25 +122,14 @@ export async function POST(
         },
         qrToken: testQrToken,
         confirmationToken: testConfirmationToken,
-        data: {
-          name: guestName,
-          eventName: event.name,
-          eventDate: eventDate,
-          eventLocation: event.location || "",
-        },
+        data: invitationData,
       });
     } else {
-      // Template por defecto
-      htmlContent = await generateInvitationWithQR({
+      invitationResult = await generateInvitationWithQR({
         template: {},
         qrToken: testQrToken,
         confirmationToken: testConfirmationToken,
-        data: {
-          name: guestName,
-          eventName: event.name,
-          eventDate: eventDate,
-          eventLocation: event.location || "",
-        },
+        data: invitationData,
       });
     }
 
@@ -147,9 +142,7 @@ export async function POST(
         </p>
       </div>
     `;
-    
-    // Insertar el banner al inicio del body
-    htmlContent = htmlContent.replace(
+    const htmlWithBanner = invitationResult.html.replace(
       /<body[^>]*>/i,
       `$&${testBanner}`
     );
@@ -158,7 +151,8 @@ export async function POST(
     const emailResult = await sendEmail({
       to: organizerEmail,
       subject: `[PRUEBA] Invitación a ${event.name}`,
-      html: htmlContent,
+      html: htmlWithBanner,
+      attachments: invitationResult.attachments,
     });
 
     if (!emailResult.success) {

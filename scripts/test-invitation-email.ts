@@ -29,8 +29,8 @@ async function testInvitationEmail() {
   const qrImage = await generateQRImage(qrToken);
   console.log("✅ QR generado, tamaño:", (qrImage.length / 1024).toFixed(2), "KB");
   
-  // Generar HTML completo (como lo hace la app)
-  const htmlContent = await generateInvitationWithQR({
+  // Generar HTML completo (como lo hace la app, con adjuntos CID)
+  const invitationResult = await generateInvitationWithQR({
     template: {},
     qrToken: qrToken,
     confirmationToken: confirmationToken,
@@ -49,7 +49,8 @@ async function testInvitationEmail() {
     },
   });
   
-  console.log("✅ HTML generado, tamaño total:", (htmlContent.length / 1024).toFixed(2), "KB");
+  console.log("✅ HTML generado, tamaño total:", (invitationResult.html.length / 1024).toFixed(2), "KB");
+  console.log("✅ Adjuntos CID:", invitationResult.attachments.length);
   console.log("");
   
   // Enviar usando la misma función que la app
@@ -59,7 +60,8 @@ async function testInvitationEmail() {
   const result = await sendEmail({
     to: destinationEmail,
     subject: "Invitación de Prueba - PASSLY",
-    html: htmlContent,
+    html: invitationResult.html,
+    attachments: invitationResult.attachments,
   });
   
   console.log("");

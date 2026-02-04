@@ -79,10 +79,24 @@ export async function POST(
       qrToken = invitation.guestEvent.qrCode.token;
     }
 
-    // Generate invitation with QR embedded
-    let htmlContent = "";
+    const invitationData = {
+      name: invitation.guestEvent.guest.name,
+      eventName: invitation.guestEvent.event.name,
+      eventDate: new Date(invitation.guestEvent.event.date).toLocaleDateString("es-AR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      eventLocation: invitation.guestEvent.event.location || "",
+    };
+
+    // Generate invitation with QR embedded (con adjuntos CID para Gmail/Outlook)
+    let invitationResult;
     if (invitation.template) {
-      htmlContent = await generateInvitationWithQR({
+      invitationResult = await generateInvitationWithQR({
         template: {
           backgroundImage: invitation.template.backgroundImage,
           htmlContent: invitation.template.htmlContent,
@@ -94,71 +108,35 @@ export async function POST(
         },
         qrToken: qrToken,
         confirmationToken: invitation.confirmationToken,
-        data: {
-          name: invitation.guestEvent.guest.name,
-          eventName: invitation.guestEvent.event.name,
-          eventDate: new Date(invitation.guestEvent.event.date).toLocaleDateString("es-AR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          eventLocation: invitation.guestEvent.event.location || "",
-        },
+        data: invitationData,
       });
     } else if (invitation.emailBody) {
-      // Si hay emailBody personalizado, usar template por defecto pero con el body
-      htmlContent = await generateInvitationWithQR({
-        template: {},
+      // emailBody personalizado: usar como htmlContent (tiene {{qrImage}}, {{rsvpButtons}})
+      invitationResult = await generateInvitationWithQR({
+        template: {
+          htmlContent: invitation.emailBody,
+          cssContent: null,
+        },
         qrToken: qrToken,
         confirmationToken: invitation.confirmationToken,
-        data: {
-          name: invitation.guestEvent.guest.name,
-          eventName: invitation.guestEvent.event.name,
-          eventDate: new Date(invitation.guestEvent.event.date).toLocaleDateString("es-AR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          eventLocation: invitation.guestEvent.event.location || "",
-        },
+        data: invitationData,
       });
-      // Reemplazar contenido con el emailBody personalizado
-      htmlContent = invitation.emailBody.replace(/{{qrImage}}/g, htmlContent);
-      htmlContent = htmlContent.replace(/{{rsvpButtons}}/g, htmlContent.includes("{{rsvpButtons}}") ? "" : "");
     } else {
-      // Default template
-      htmlContent = await generateInvitationWithQR({
+      invitationResult = await generateInvitationWithQR({
         template: {},
         qrToken: qrToken,
         confirmationToken: invitation.confirmationToken,
-        data: {
-          name: invitation.guestEvent.guest.name,
-          eventName: invitation.guestEvent.event.name,
-          eventDate: new Date(invitation.guestEvent.event.date).toLocaleDateString("es-AR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          eventLocation: invitation.guestEvent.event.location || "",
-        },
+        data: invitationData,
       });
     }
 
-        // Send email
-        const emailResult = await sendEmail({
-          to: invitation.guestEvent.guest.email,
-          subject: invitation.emailSubject || `Invitación a ${invitation.guestEvent.event.name}`,
-          html: htmlContent,
-        });
+    // Send email
+    const emailResult = await sendEmail({
+      to: invitation.guestEvent.guest.email,
+      subject: invitation.emailSubject || `Invitación a ${invitation.guestEvent.event.name}`,
+      html: invitationResult.html,
+      attachments: invitationResult.attachments,
+    });
 
         if (!emailResult.success) {
           console.error("❌ Error detallado del email:", {

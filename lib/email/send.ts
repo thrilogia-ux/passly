@@ -30,11 +30,21 @@ function getResend() {
   return new Resend(cleanKey);
 }
 
+/** Adjunto para imágenes inline (CID) - compatible con Gmail/Outlook */
+export interface EmailAttachment {
+  cid: string;
+  content: string; // base64 sin prefijo data:image/...
+  filename: string;
+  contentType?: string;
+}
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
   html: string;
   from?: string;
+  replyTo?: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmail(options: SendEmailOptions) {
@@ -53,24 +63,7 @@ export async function sendEmail(options: SendEmailOptions) {
     return { success: false, error };
   }
 
-  // Prioridad 1: SMTP (Gmail) - Más rápido y confiable
-  if (sendEmailSMTP && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
-    try {
-      console.log("📧 [EMAIL] Usando Gmail SMTP (prioridad 1)...");
-      const result = await sendEmailSMTP(options);
-      if (result.success) {
-        return result;
-      }
-      // Si falla, continuar con Resend
-      console.warn("⚠️  [EMAIL] SMTP falló, intentando Resend...");
-    } catch (error: any) {
-      console.warn("⚠️  [EMAIL] Error con SMTP, intentando Resend...");
-      console.warn("⚠️  [EMAIL] Error:", error.message);
-      // Continuar con Resend como fallback
-    }
-  }
-
-  // Prioridad 2: Resend (mantener como fallback)
+  // Prioridad 1: Resend (principal - mejor deliverability, dominio propio)
   const resendApiKey = process.env.RESEND_API_KEY || 
                        process.env.NEXT_PUBLIC_RESEND_API_KEY;
   const cleanKey = resendApiKey ? resendApiKey.replace(/^["']|["']$/g, '').trim() : "";
@@ -79,23 +72,25 @@ export async function sendEmail(options: SendEmailOptions) {
   console.log("🔍 [EMAIL] RESEND_API_KEY length:", cleanKey.length);
   console.log("🔍 [EMAIL] EMAIL_FROM:", process.env.EMAIL_FROM || "No configurado (usará default)");
   
-  // Si no hay API key válida
+  // Si no hay API key válida, intentar SMTP como alternativa
   if (!cleanKey || cleanKey === "" || cleanKey.length < 10) {
+    if (sendEmailSMTP && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+      console.log("📧 [EMAIL] RESEND no configurado, usando Gmail SMTP...");
+      try {
+        const result = await sendEmailSMTP(options);
+        if (result.success) return result;
+      } catch (e: any) {
+        console.warn("⚠️  [EMAIL] SMTP falló:", e?.message);
+      }
+    }
     const isProduction = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
-    
     if (isProduction) {
-      // En producción, no intentar guardar archivos (filesystem es read-only)
-      console.error("❌ [EMAIL] RESEND_API_KEY no configurada en producción");
       return {
         success: false,
-        error: "RESEND_API_KEY no está configurada. Configura RESEND_API_KEY en las variables de entorno de Vercel para enviar emails.",
+        error: "RESEND_API_KEY no está configurada. Configura RESEND_API_KEY en las variables de entorno de Vercel.",
       };
     }
-    
-    // Solo en desarrollo local, usar modo desarrollo
-    console.warn("⚠️  [EMAIL] RESEND_API_KEY no configurada o inválida");
     console.warn("⚠️  [EMAIL] Usando MODO DESARROLLO (emails se guardan en: emails-dev/)");
-    console.warn("⚠️  [EMAIL] Para enviar emails reales, configura SMTP o RESEND_API_KEY en .env");
     return await sendEmailDev(options);
   }
 
@@ -131,11 +126,21 @@ export async function sendEmail(options: SendEmailOptions) {
     console.log("📧 [RESEND] Asunto:", options.subject);
     console.log("📧 [RESEND] HTML length:", options.html.length, "caracteres");
     
+    const replyTo = options.replyTo || process.env.EMAIL_REPLY_TO || undefined;
     const result = await resend.emails.send({
       from: fromEmail,
       to: options.to,
       subject: options.subject,
       html: options.html,
+      ...(replyTo && { replyTo }),
+      ...(options.attachments?.length && {
+        attachments: options.attachments.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+          contentId: a.cid,
+          ...(a.contentType && { content_type: a.contentType }),
+        })),
+      }),
     });
 
     console.log("📧 [RESEND] ========================================");
@@ -210,7 +215,17 @@ export async function sendEmail(options: SendEmailOptions) {
     
     console.error("❌ [RESEND] Error procesado:", errorMessage);
     
-    // NO usar modo desarrollo como fallback - queremos saber si falla
+    // Fallback: intentar SMTP (Gmail) si está configurado
+    if (sendEmailSMTP && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+      console.warn("⚠️  [EMAIL] Intentando fallback con Gmail SMTP...");
+      try {
+        const result = await sendEmailSMTP(options);
+        if (result.success) return result;
+      } catch (smtpError: any) {
+        console.error("❌ [EMAIL] SMTP fallback también falló:", smtpError?.message);
+      }
+    }
+    
     return { 
       success: false, 
       error: errorMessage,

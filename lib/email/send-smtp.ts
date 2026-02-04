@@ -1,10 +1,19 @@
 import nodemailer from "nodemailer";
 
+export interface EmailAttachment {
+  cid: string;
+  content: string;
+  filename: string;
+  contentType?: string;
+}
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
   html: string;
   from?: string;
+  replyTo?: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmailSMTP(options: SendEmailOptions) {
@@ -44,6 +53,13 @@ export async function sendEmailSMTP(options: SendEmailOptions) {
   }
 
   const fromEmail = options.from || process.env.EMAIL_FROM || process.env.SMTP_USER || "PASSLY <passlysend@gmail.com>";
+  const replyTo = options.replyTo || process.env.EMAIL_REPLY_TO || undefined;
+
+  const attachments = options.attachments?.map((a) => ({
+    filename: a.filename,
+    content: Buffer.from(a.content, "base64"),
+    cid: a.cid,
+  }));
 
   try {
     const info = await transporter.sendMail({
@@ -51,6 +67,8 @@ export async function sendEmailSMTP(options: SendEmailOptions) {
       to: options.to,
       subject: options.subject,
       html: options.html,
+      ...(replyTo && { replyTo }),
+      ...(attachments?.length && { attachments }),
     });
 
     console.log("✅ [SMTP] Email enviado exitosamente!");

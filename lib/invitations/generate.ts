@@ -2,6 +2,17 @@ import { generateQRImage } from "@/lib/qr/generate";
 import { imageToBase64 } from "./image-to-base64";
 import { combineBackgroundWithQR } from "./combine-images";
 
+/** Resultado con HTML y adjuntos para CID (Gmail/Outlook compatibles) */
+export interface GenerateInvitationResult {
+  html: string;
+  attachments: Array<{ cid: string; content: string; filename: string; contentType?: string }>;
+}
+
+function dataUrlToBase64(dataUrl: string): string {
+  const match = dataUrl.match(/^data:image\/\w+;base64,(.+)$/);
+  return match ? match[1] : dataUrl;
+}
+
 export interface GenerateInvitationOptions {
   template: {
     backgroundImage?: string | null;
@@ -36,7 +47,7 @@ export interface GenerateInvitationOptions {
 
 export async function generateInvitationWithQR(
   options: GenerateInvitationOptions
-): Promise<string> {
+): Promise<GenerateInvitationResult> {
   const { template, qrToken, data, confirmationToken } = options;
 
   // Generar imagen del QR
@@ -153,7 +164,14 @@ export async function generateInvitationWithQR(
       `;
     }
     
-    return `
+    const attachment = {
+      cid: "invitation-bg",
+      content: dataUrlToBase64(combinedImageUrl),
+      filename: "invitation.png",
+      contentType: "image/png",
+    };
+    return {
+      html: `
       <!DOCTYPE html>
       <html>
         <head>
@@ -196,7 +214,7 @@ export async function generateInvitationWithQR(
         <body>
           <div class="email-wrapper">
             <div class="invitation-container">
-              <img src="${combinedImageUrl}" alt="Invitation with QR Code" class="background-image" />
+              <img src="cid:invitation-bg" alt="Invitation with QR Code" class="background-image" />
             </div>
             <div class="content-section">
               ${invitationContent}
@@ -205,7 +223,9 @@ export async function generateInvitationWithQR(
           </div>
         </body>
       </html>
-    `;
+    `,
+      attachments: [attachment],
+    };
   }
 
   // Si hay HTML content (sin backgroundImage), usar template con placeholders
@@ -253,16 +273,25 @@ export async function generateInvitationWithQR(
       html = html.replace(/{{eventLocation}}/g, data.eventLocation || "");
     }
     
-    html = html.replace(/{{qrImage}}/g, `<img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px; display: block; margin: 20px auto;" />`);
+    html = html.replace(/{{qrImage}}/g, `<img src="cid:qr-code" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px; display: block; margin: 20px auto;" />`);
     html = html.replace(/{{rsvpButtons}}/g, rsvpButtons);
     html = html.replace(/{{confirmUrl}}/g, confirmUrl || "");
     
-    return html;
+    return {
+      html,
+      attachments: [{
+        cid: "qr-code",
+        content: dataUrlToBase64(qrImage),
+        filename: "qr-code.png",
+        contentType: "image/png",
+      }],
+    };
   }
 
   // Template por defecto
-       const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
-  return `
+  const mapsLink = data.eventLocation ? getGoogleMapsLink(data.eventLocation) : "";
+  return {
+    html: `
     <!DOCTYPE html>
     <html>
       <head>
@@ -287,11 +316,18 @@ export async function generateInvitationWithQR(
                <p>Ubicación: ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="color: #ff5040; text-decoration: none;">${data.eventLocation}</a> <span style="font-size: 11px; color: #999;">(Ver en Google Maps)</span>` : data.eventLocation}</p>
              ` : ""}
         <div style="margin: 20px 0; text-align: center;">
-          <img src="${qrImage}" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
+          <img src="cid:qr-code" alt="QR Code" style="width: ${qrSize}px; height: ${qrSize}px;" />
           <p style="font-size: 12px; color: #666; margin-top: 10px;">Presenta este código QR en el evento</p>
         </div>
         ${rsvpButtons}
       </body>
     </html>
-  `;
+  `,
+    attachments: [{
+      cid: "qr-code",
+      content: dataUrlToBase64(qrImage),
+      filename: "qr-code.png",
+      contentType: "image/png",
+    }],
+  };
 }

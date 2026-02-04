@@ -2,11 +2,19 @@
 import * as fs from "fs";
 import * as path from "path";
 
+export interface EmailAttachment {
+  cid: string;
+  content: string;
+  filename: string;
+  contentType?: string;
+}
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
   html: string;
   from?: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmailDev(options: SendEmailOptions) {
@@ -21,6 +29,18 @@ export async function sendEmailDev(options: SendEmailOptions) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const filename = `email-${timestamp}-${options.to.replace(/[@.]/g, "-")}.html`;
     const filepath = path.join(emailsDir, filename);
+
+    // En dev: reemplazar cid: con data URLs para que las imágenes se vean en el preview
+    let htmlForPreview = options.html;
+    if (options.attachments?.length) {
+      for (const att of options.attachments) {
+        const dataUrl = `data:${att.contentType || "image/png"};base64,${att.content}`;
+        htmlForPreview = htmlForPreview.replace(
+          new RegExp(`cid:${att.cid.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g"),
+          dataUrl
+        );
+      }
+    }
 
     // Crear contenido del email
     const emailContent = `
@@ -50,7 +70,7 @@ export async function sendEmailDev(options: SendEmailOptions) {
       <p><strong>Archivo:</strong> ${filename}</p>
     </div>
     <div class="content">
-      ${options.html}
+      ${htmlForPreview}
     </div>
   </div>
 </body>

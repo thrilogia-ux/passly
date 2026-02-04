@@ -206,10 +206,10 @@ export async function POST(
           });
         }
 
-        // Generar HTML de invitación
-        let htmlContent = "";
+        // Generar HTML de invitación (con adjuntos CID para Gmail/Outlook)
+        let invitationResult;
         if (invitation.template) {
-          htmlContent = await generateInvitationWithQR({
+          invitationResult = await generateInvitationWithQR({
             template: {
               backgroundImage: invitation.template.backgroundImage,
               htmlContent: invitation.template.htmlContent,
@@ -236,8 +236,7 @@ export async function POST(
             },
           });
         } else {
-          // Default template
-          htmlContent = await generateInvitationWithQR({
+          invitationResult = await generateInvitationWithQR({
             template: {},
             qrToken: qrToken,
             confirmationToken: confirmationToken,
@@ -261,7 +260,8 @@ export async function POST(
         const emailResult = await sendEmail({
           to: invitation.guestEvent.guest.email,
           subject: invitation.emailSubject || `Invitación a ${invitation.guestEvent.event.name}`,
-          html: htmlContent,
+          html: invitationResult.html,
+          attachments: invitationResult.attachments,
         });
 
         if (!emailResult.success) {
