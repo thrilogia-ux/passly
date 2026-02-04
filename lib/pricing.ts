@@ -2,16 +2,16 @@
 
 // Paquetes de tokens disponibles
 export const TOKEN_PACKAGES = [
-  { tokens: 50, priceARS: 22000, popular: false },
-  { tokens: 100, priceARS: 39600, popular: false },
-  { tokens: 250, priceARS: 88000, popular: true },
-  { tokens: 500, priceARS: 154000, popular: false },
-  { tokens: 1000, priceARS: 264000, popular: false },
+  { tokens: 50, priceARS: 44000, popular: false },
+  { tokens: 100, priceARS: 79200, popular: false },
+  { tokens: 250, priceARS: 176000, popular: true },
+  { tokens: 500, priceARS: 308000, popular: false },
+  { tokens: 1000, priceARS: 528000, popular: false },
 ];
 
 // Precio por token individual (para compras personalizadas)
-// Referencia: $396 por token (paquete 100)
-export const PRICE_PER_TOKEN_ARS = 396;
+// Referencia: $792 por token (paquete 100, precio duplicado)
+export const PRICE_PER_TOKEN_ARS = 792;
 
 // Funciones de formato
 export function formatARS(amount: number): string {
