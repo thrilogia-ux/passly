@@ -10,8 +10,10 @@ generator client {
 // Run with: npm run db:seed
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Conexión directa para migrations (evita pooler). Requerido con Supabase pooler.
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // User Roles: SUPER_ADMIN, CLIENT, ORGANIZER, STAFF

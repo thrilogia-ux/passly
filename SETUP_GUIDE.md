@@ -17,7 +17,9 @@ Crea un archivo `.env` en la raíz del proyecto con:
 
 ```env
 # Base de Datos (IMPORTANTE: Cambia user, password, y nombre de BD)
+# Supabase: usar pooler (puerto 6543) para DATABASE_URL y directa (5432) para DIRECT_DATABASE_URL
 DATABASE_URL="postgresql://user:password@localhost:5432/passly?schema=public"
+DIRECT_DATABASE_URL="postgresql://user:password@localhost:5432/passly?schema=public"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"

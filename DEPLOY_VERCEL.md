@@ -135,8 +135,12 @@ En la pantalla de configuración, ve a **Environment Variables** y agrega:
 #### Variables OBLIGATORIAS:
 
 ```env
-# Base de Datos PostgreSQL
-DATABASE_URL=postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres
+# Base de Datos PostgreSQL (Supabase: usar CONNECTION POOLER para evitar MaxClients)
+# Pooler (Transaction): puerto 6543, host pooler.supabase.com - usar para DATABASE_URL
+DATABASE_URL=postgresql://post.[PROJECT]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
+
+# Conexión directa para migrations (Supabase: puerto 5432)
+DIRECT_DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres
 
 # NextAuth
 NEXTAUTH_URL=https://tu-proyecto.vercel.app
@@ -277,11 +281,19 @@ Vercel automáticamente:
 ### Error: "NEXTAUTH_SECRET missing"
 **Solución**: Agrega la variable en Vercel → Settings → Environment Variables
 
+### Error: "MaxClientsInSessionMode: max clients reached"
+**Solución**: Usa el Connection Pooler de Supabase (puerto 6543) en lugar de la conexión directa (5432):
+1. Supabase → Settings → Database → Connection string
+2. Elige **Transaction** (pooler)
+3. Copia la URL y agrega `?pgbouncer=true` al final
+4. Usa esa URL como `DATABASE_URL` en Vercel
+5. Agrega `DIRECT_DATABASE_URL` con la conexión **directa** (puerto 5432) para migrations
+
 ### Error: "Migration failed"
 **Solución**: 
 - Ejecuta migraciones manualmente primero (Paso 10)
-- Verifica que `DATABASE_URL` es correcta
-- Revisa logs en Supabase
+- Verifica que `DATABASE_URL` y `DIRECT_DATABASE_URL` están configuradas
+- Para proveedores sin pooler, usa `DIRECT_DATABASE_URL` igual que `DATABASE_URL`
 
 ### Build muy lento
 **Solución**: Normal en el primer build. Los siguientes serán más rápidos gracias al cache.
@@ -298,7 +310,7 @@ Antes de hacer push:
 - [ ] `.gitignore` configurado ✅
 - [ ] Repositorio en GitHub creado
 - [ ] Variables de entorno configuradas en Vercel
-- [ ] `DATABASE_URL` apuntando a PostgreSQL
+- [ ] `DATABASE_URL` (pooler) y `DIRECT_DATABASE_URL` (directa) para Supabase
 - [ ] `NEXTAUTH_URL` con URL de Vercel
 - [ ] Secrets generados y configurados
 

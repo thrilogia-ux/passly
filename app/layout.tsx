@@ -14,7 +14,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PASSLY - Invitaciones Digitales que Impresionan",
-  description: "Diseña invitaciones personalizadas, gestiona eventos y realiza check-in con QR. Todo en una plataforma simple y poderosa.",
+  description:
+    "Diseña invitaciones personalizadas, gestiona eventos y realiza check-in con QR. Todo en una plataforma simple y poderosa.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+  },
 };
 
 export default function RootLayout({
