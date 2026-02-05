@@ -65,6 +65,7 @@ model User {
   // Relations
   organizedEvents Event[]   @relation("EventOrganizer")
   checkIns        CheckIn[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([organizationId])
@@ -298,4 +299,15 @@ model TokenTransaction {
   @@index([organizationId])
   @@index([type])
   @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  @@index([userId])
 }

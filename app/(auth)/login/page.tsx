@@ -106,6 +106,14 @@ function LoginContent() {
                 required
               />
             </div>
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#ff5040] hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
