@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,10 +16,11 @@ export const metadata: Metadata = {
   title: "PASSLY - Invitaciones Digitales que Impresionan",
   description:
     "Diseña invitaciones personalizadas, gestiona eventos y realiza check-in con QR. Todo en una plataforma simple y poderosa.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
