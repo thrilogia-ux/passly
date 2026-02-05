@@ -4,14 +4,18 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
 import { UserMenu } from "@/components/auth/user-menu";
-import { 
-  Calendar, 
-  Users, 
-  Mail, 
-  QrCode, 
+import {
+  Calendar,
+  Users,
+  Mail,
+  QrCode,
   FileText,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
+
+// El dashboard usa auth() y datos dinámicos,
+// forzamos que todas las rutas bajo /dashboard sean dinámicas.
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({
   children,
