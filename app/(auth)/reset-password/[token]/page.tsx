@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-interface ResetPasswordPageProps {
-  params: { token: string };
-}
-
-export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const { token } = params;
+  const params = useParams<{ token: string }>();
+  const token = params?.token;
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,6 +29,11 @@ export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
     e.preventDefault();
     setError(null);
     setMessage(null);
+
+    if (!token || typeof token !== "string") {
+      setError("El enlace para restablecer la contraseña es inválido.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
@@ -66,7 +68,9 @@ export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
             "Ocurrió un error al restablecer la contraseña. Intenta nuevamente."
         );
       } else {
-        setMessage("Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.");
+        setMessage(
+          "Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión."
+        );
         setTimeout(() => {
           router.push("/login");
         }, 2500);
