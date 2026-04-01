@@ -11,6 +11,49 @@ interface QRScannerProps {
   onClose?: () => void;
 }
 
+/** Cámara trasera por etiqueta del dispositivo (más fiable que solo facingMode en móvil). */
+function pickRearCameraId(devices: { id: string; label: string }[]): string | undefined {
+  if (!devices.length) return undefined;
+
+  const facingBack = devices.find((d) =>
+    /facing\s+back|facing\s+environment/i.test(d.label)
+  );
+  if (facingBack) return facingBack.id;
+
+  const lower = (s: string) => s.toLowerCase();
+  const rearHints = [
+    "back",
+    "rear",
+    "environment",
+    "trasera",
+    "posterior",
+    "traseira",
+    "arrière",
+    "wide angle",
+    "wide-angle",
+  ];
+  const frontHints = [
+    "front",
+    "user",
+    "selfie",
+    "face",
+    "facial",
+    "delantera",
+    "truedepth",
+  ];
+
+  const matchesRear = (label: string) => rearHints.some((h) => lower(label).includes(h));
+  const matchesFront = (label: string) => frontHints.some((h) => lower(label).includes(h));
+
+  const rearOnly = devices.filter((d) => matchesRear(d.label) && !matchesFront(d.label));
+  if (rearOnly.length >= 1) return rearOnly[0].id;
+
+  const notClearlyFront = devices.filter((d) => !matchesFront(d.label) && d.label.trim() !== "");
+  if (notClearlyFront.length === 1) return notClearlyFront[0].id;
+
+  return undefined;
+}
+
 export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,42 +64,72 @@ export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
     try {
       setError(null);
       const scanner = new Html5Qrcode("qr-reader");
-      
-      await scanner.start(
-        {
-          facingMode: "environment", // Usar cámara trasera en móviles
-        },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        (decodedText) => {
-          // QR code escaneado exitosamente
-          console.log("✅ QR Code escaneado:", decodedText);
-          scanner.stop().then(() => {
-            setScanning(false);
-            onScan(decodedText);
-          }).catch((err) => {
-            console.error("Error deteniendo scanner:", err);
-            setScanning(false);
-          });
-        },
-        (errorMessage) => {
-          // Ignorar errores de escaneo continuo (solo log en desarrollo)
-          if (process.env.NODE_ENV === "development") {
-            // Log cada 10 intentos para no saturar la consola
-            if (Math.random() < 0.1) {
-              console.log("Escaneando...", errorMessage);
-            }
-          }
+
+      const onDecoded = (decodedText: string) => {
+        console.log("✅ QR Code escaneado:", decodedText);
+        scanner.stop().then(() => {
+          setScanning(false);
+          onScan(decodedText);
+        }).catch((err) => {
+          console.error("Error deteniendo scanner:", err);
+          setScanning(false);
+        });
+      };
+
+      const onFrameError = (errorMessage: string) => {
+        if (process.env.NODE_ENV === "development" && Math.random() < 0.1) {
+          console.log("Escaneando...", errorMessage);
         }
-      );
+      };
+
+      const scanConfig = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 } as const,
+        disableFlip: true,
+      };
+
+      let started = false;
+      const cameras = await Html5Qrcode.getCameras();
+      const rearId = pickRearCameraId(cameras);
+
+      if (rearId) {
+        try {
+          await scanner.start(rearId, scanConfig, onDecoded, onFrameError);
+          started = true;
+        } catch (e) {
+          console.warn("[QR] deviceId trasero falló, probando facingMode…", e);
+        }
+      }
+
+      if (!started) {
+        try {
+          await scanner.start(
+            { facingMode: { exact: "environment" } },
+            scanConfig,
+            onDecoded,
+            onFrameError
+          );
+          started = true;
+        } catch {
+          /* sin cámara trasera (p. ej. laptop) */
+        }
+      }
+
+      if (!started) {
+        await scanner.start(
+          { facingMode: "environment" },
+          scanConfig,
+          onDecoded,
+          onFrameError
+        );
+      }
 
       scannerRef.current = scanner;
       setScanning(true);
-    } catch (err: any) {
-      setError(err.message || "Error al iniciar la cámara");
-      onError?.(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error al iniciar la cámara";
+      setError(message);
+      onError?.(message);
       setScanning(false);
     }
   };
@@ -66,7 +139,7 @@ export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
       try {
         await scannerRef.current.stop();
         scannerRef.current.clear();
-      } catch (err) {
+      } catch {
         // Ignorar errores al detener
       }
       scannerRef.current = null;
@@ -84,7 +157,7 @@ export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
     <div className="w-full">
       <div className="relative bg-black rounded-lg overflow-hidden" ref={containerRef}>
         <div id="qr-reader" className="w-full" style={{ minHeight: "300px" }}></div>
-        
+
         {!scanning && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="text-center text-white p-4">
@@ -102,11 +175,7 @@ export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
 
         {scanning && (
           <div className="absolute top-4 right-4">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={stopScanning}
-            >
+            <Button variant="destructive" size="sm" onClick={stopScanning}>
               <X className="w-4 h-4 mr-1" />
               Detener
             </Button>
@@ -116,20 +185,12 @@ export function QRScanner({ onScan, onError, onClose }: QRScannerProps) {
 
       <div className="mt-4 flex gap-2">
         {!scanning ? (
-          <Button
-            onClick={startScanning}
-            className="flex-1"
-            variant="default"
-          >
+          <Button onClick={startScanning} className="flex-1" variant="default">
             <Camera className="w-4 h-4 mr-2" />
             Iniciar Escaneo
           </Button>
         ) : (
-          <Button
-            onClick={stopScanning}
-            className="flex-1"
-            variant="outline"
-          >
+          <Button onClick={stopScanning} className="flex-1" variant="outline">
             Detener Escaneo
           </Button>
         )}
